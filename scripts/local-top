@@ -1,0 +1,11 @@
+#!/bin/sh
+case "$1" in
+prereqs)
+	echo ""
+	exit 0
+	;;
+esac
+echo "ramroot: local-top"
+set -x
+echo ROOT=/dev/mtdblock0 > /conf/param.conf
+

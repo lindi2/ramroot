@@ -1,0 +1,33 @@
+#!/bin/sh
+case "$1" in
+prereqs)
+	echo ""
+	exit 0
+	;;
+esac
+
+echo "ramroot: local-bottom"
+set -x
+snapshot=""
+for x in $(cat /proc/cmdline); do
+    case $x in
+	snapshot=*)
+	    snapshot=${x#snapshot=}
+	    ;;
+    esac
+done
+
+if [ "${snapshot}" = "" ]; then
+    echo "no snapshot parameter given! dropping to shell"
+    /bin/sh
+    . /conf/param.conf
+fi
+
+mknod /hda1 b 3 1
+mkdir /fs
+mount -n /hda1 /fs
+echo "snapshot=$snapshot"
+cp -a /fs/snapshot/${snapshot}/* ${rootmnt}
+umount /fs
+rmdir /fs
+rm /hda1
