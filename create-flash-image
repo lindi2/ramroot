@@ -1,0 +1,46 @@
+#!/bin/bash
+set -e
+set -x
+export LC_ALL=C
+
+if [ -e img ]; then rm img; fi
+if [ -d mnt ]; then rmdir mnt; fi
+mkdir mnt
+# 512*1024*1024/(512*63*255) = 65
+dd if=/dev/zero of=img bs=1M count=0 seek=512
+set +e
+/sbin/fdisk -C 65 -H 255 -S 63 img <<EOF
+n
+p
+1
+1
+65
+a
+1
+w
+q
+EOF
+set -e
+
+sudo losetup -o 32256 /dev/loop0 img
+sudo mke2fs /dev/loop0
+sudo losetup -d /dev/loop0
+
+sudo mount img mnt -oloop,offset=32256
+sudo cp -a fs/snapshot mnt
+sudo mkdir -p mnt/boot/grub
+sudo cp /usr/lib/grub/i386-pc/{stage1,e2fs_stage1_5,stage2} mnt/boot/grub
+sudo umount mnt
+
+grub <<EOF
+device (hd0) img
+geometry (hd0) 65 255 63
+root (hd0,0)
+setup (hd0)
+quit
+EOF
+
+sudo mount img mnt -oloop,offset=32256
+echo -e "title 0\nconfigfile (hd0,0)/snapshot/0/boot/grub/menu.lst" | sudo tee mnt/boot/grub/menu.lst
+sudo umount mnt
+rmdir mnt
