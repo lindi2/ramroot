@@ -16,7 +16,7 @@ sudo cp scripts/local-premount fs/snapshot/0/etc/initramfs-tools/scripts/local-p
 sudo cp scripts/local-bottom fs/snapshot/0/etc/initramfs-tools/scripts/local-bottom/ramroot
 sudo chroot fs/snapshot/0 update-initramfs -k all -c -t
 
-sudo install scripts/ramroot-{aptgludge,snapshot} fs/snapshot/0/usr/local/bin
+sudo install scripts/ramroot-{aptgludge,snapshot,update-grub} fs/snapshot/0/usr/local/bin
 
 sudo mkdir -p fs/snapshot/0/boot/grub
 echo y | sudo chroot fs/snapshot/0 update-grub

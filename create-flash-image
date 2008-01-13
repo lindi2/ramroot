@@ -42,6 +42,6 @@ quit
 EOF
 
 sudo mount img mnt -oloop,offset=32256
-echo -e "title 0\nconfigfile (hd0,0)/snapshot/0/boot/grub/menu.lst" | sudo tee mnt/boot/grub/menu.lst
+echo -e "default 0\ntimeout 10\ntitle 0\nconfigfile (hd0,0)/snapshot/0/boot/grub/menu.lst" | sudo tee mnt/boot/grub/menu.lst
 sudo umount mnt
 rmdir mnt
