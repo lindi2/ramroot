@@ -1,0 +1,28 @@
+#!/bin/sh
+function cleanup() {
+    umount /ram
+    umount /flash
+    rmdir /ram /flash
+    exit 0
+}
+trap cleanup 1 2 3 15
+
+old="$1"
+new="$2"
+desc="$3"
+
+if [ ! -d /ram ]; then mkdir /ram; fi
+if [ ! -d /flash ]; then mkdir /flash; fi
+mount -n --bind / /ram
+mount -n /dev/hda1 /flash
+if [ ! -d "/flash/snapshot/$old" ]; then
+    echo "old snapshot must exist"
+    cleanup
+fi
+if [ -d "/flash/snapshot/$new" ]; then
+    echo "new snapshot must not exist"
+    cleanup
+fi
+rsync --numeric-ids -ax --delete --link-dest=../${old} /ram/ /flash/snapshot/${new}
+echo "`date`: $desc" > /flash/snapshot/${new}/etc/snapshot/info
+cleanup
