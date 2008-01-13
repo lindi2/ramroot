@@ -6,7 +6,7 @@ export LC_ALL=C
 # http://iki.fi/lindi/qemu-network.txt
 userid="`whoami`"
 iface="`sudo tunctl -b -u $userid`"
-args="-hda img -boot c -snapshot"
+args="-hda img -boot c"
 args+=" -net nic,vlan=9,macaddr=52:54:00:12:35:09"
 args+=" -net tap,vlan=9,ifname=$iface,script=/etc/qemu-ifup"
 args+=" -m 256 -vnc :49 -monitor stdio"
