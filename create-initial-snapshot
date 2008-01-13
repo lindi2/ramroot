@@ -5,7 +5,7 @@ export LC_ALL=C
 
 if [ -d fs ]; then sudo rm -fr fs; fi
 sudo mkdir -p fs/snapshot/0
-sudo debootstrap etch fs/snapshot/0 http://apt-proxy.kurp.hut.fi:9999/debian || true
+sudo debootstrap etch fs/snapshot/0
 remove="apt-utils aptitude bsdmainutils cpio cron dmidecode dselect ed groff-base info iptables"
 remove+=" klogd laptop-detect libconsole libdb4.4 libgdbm3 liblocale-gettext-perl libncursesw5"
 remove+=" libnewt0.52 libpopt0 libsasl2 libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl"
