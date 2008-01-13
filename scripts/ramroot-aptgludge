@@ -1,0 +1,10 @@
+#!/bin/sh
+case "$1" in
+    start)
+	mount -t tmpfs none /var/cache/apt
+	mkdir -p /var/cache/apt/archives/partial
+	;;
+    stop)
+	umount /var/cache/apt
+	;;
+esac
