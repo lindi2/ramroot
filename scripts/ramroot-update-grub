@@ -22,7 +22,9 @@ for i in `cd /flash/snapshot && echo *`; do
 	title="(snapshot {$i}) /etc/snapshot/info missing!"
     else
 	title="`cat /flash/snapshot/${i}/etc/snapshot/info`"
-    echo -e "title ${title}\nconfigfile (hd0,0)/snapshot/${i}/boot/grub/menu.lst" >> /flash/boot/grub.menu.lst.new
+    echo -e "title ${title}\n configfile (hd0,0)/snapshot/${i}/boot/grub/menu.lst" >> /flash/boot/grub/menu.lst.new
+    fi
 done
+mv /flash/boot/grub/menu.lst.new /flash/boot/grub/menu.lst
 
 cleanup

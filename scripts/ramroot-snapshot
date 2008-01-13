@@ -24,6 +24,8 @@ if [ -d "/flash/snapshot/$new" ]; then
     cleanup
 fi
 rsync --numeric-ids -ax --delete --link-dest=../${old} /ram/ /flash/snapshot/${new}
+rm "/flash/snapshot/${new}/boot/grub/menu.lst"
 sed -i "s@snapshot=[0-9]*@snapshot=${new}@" /flash/snapshot/${new}/boot/grub/menu.lst
+rm "/flash/snapshot/${new}/etc/snapshot/info"
 echo "`date` (snapshot ${new}): $desc" > /flash/snapshot/${new}/etc/snapshot/info
 cleanup
