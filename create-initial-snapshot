@@ -8,5 +8,4 @@ mkdir -p fs/snapshot/0
 sudo debootstrap etch fs/snapshot/0 http://apt-proxy.kurp.hut.fi:9999/debian || true
 sudo chroot fs/snapshot/0 apt-get -y remove apt-utils aptitude bsdmainutils cpio cron dmidecode dselect ed groff-base info iptables klogd laptop-detect libconsole libdb4.4 libgdbm3 liblocale-gettext-perl libncursesw5 libnewt0.52 libpopt0 libsasl2 libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl logrotate man-db manpages nano netcat procps sysklogd tasksel tasksel-data traceroute vim-common vim-tiny wget whiptail
 sudo chroot fs/snapshot/0 dpkg -P apt-utils aptitude bsdmainutils cpio cron dmidecode dselect ed groff-base info iptables klogd laptop-detect libconsole libdb4.4 libgdbm3 liblocale-gettext-perl libncursesw5 libnewt0.52 libpopt0 libsasl2 libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl logrotate man-db manpages nano netcat procps sysklogd tasksel tasksel-data traceroute vim-common vim-tiny wget whiptail
-sudo chroot fs/snapshot/0 apt-get --force-yes -y install debconf-english libedit2 libkrb53 openssh-client openssh-server linux-image-2.6.18-5-486 grub ifupdown dhcp3-client
-# TODO: reply No No automatically
+echo -e "n\nn" | sudo chroot fs/snapshot/0 apt-get --force-yes -y install debconf-english libedit2 libkrb53 openssh-client openssh-server linux-image-2.6.18-5-486 grub ifupdown dhcp3-client

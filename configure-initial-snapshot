@@ -17,7 +17,6 @@ sudo cp scripts/local-bottom fs/snapshot/0/etc/initramfs-tools/scripts/local-bot
 sudo chroot fs/snapshot/0 update-initramfs -k all -c -t
 
 sudo mkdir -p fs/snapshot/0/boot/grub
-sudo chroot fs/snapshot/0 update-grub
-# TODO: answer yes
+echo y | sudo chroot fs/snapshot/0 update-grub
 sudo sed -i s@/boot@/snapshot/0/boot@ fs/snapshot/0/boot/grub/menu.lst
 sudo sed -i '/^kernel/s@ro $@ro snapshot=0 @' fs/snapshot/0/boot/grub/menu.lst
