@@ -22,6 +22,9 @@ q
 EOF
 set -e
 
+if [ ! -e /dev/loop0 ]; then
+    modprobe loop
+fi
 sudo losetup -o 32256 /dev/loop0 img
 # 65*255*63*512/4096 = 130528
 sudo mkfs -t ext2 -b 4096 /dev/loop0 130528
