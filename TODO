@@ -1,0 +1,33 @@
+http://www.iro.umontreal.ca/~monnier/gnu-linux/debian-live-usb
+http://osdir.com/ml/handhelds.linux.intimate/2001-07/msg00005.html
+http://jbakshi.50webs.com/Linux_tutorial/GRUB/grubmain.html
+http://gentoo-wiki.com/HOWTO_Small_Footprint_Gentoo_on_USB
+
+modprobe softdog nowayout=1
+mknod /dev/watchdog c 10 130
+echo V > /dev/watchdog
+
+default saved
+fallback 1 2
+savedefault
+title 0
+ configfile (hd0,1)/snapshots/0/boot/menu.lst
+ savedefault fallback
+title 1
+ configfile (hd0,1)/snapshots/1/boot/menu.lst
+ savedefault fallback
+title 2
+ configfile (hd0,1)/snapshots/2/boot/menu.lst
+
+grub-set-default
+
+rsync --numeric-ids -ax --delete --link-dest=../0 /live/ /saved/snapshot/1
+
+# ls -il  /saved/snapshot/{0,1}/bin/bash
+124931 -rwxr-xr-x 2 root root 677184 Dec 11  2006 /saved/snapshot/0/bin/bash
+124931 -rwxr-xr-x 2 root root 677184 Dec 11  2006 /saved/snapshot/1/bin/bash
+
+# ls -il  /saved/snapshot/{0,1}/var/lib/dpkg/available
+ 6147 -rw-r--r-- 1 root root  99477 Jan 11 19:51 /saved/snapshot/0/var/lib/dpkg/available
+55315 -rw-r--r-- 1 root root 101750 Jan 12 15:35 /saved/snapshot/1/var/lib/dpkg/available
+

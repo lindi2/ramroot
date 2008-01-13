@@ -1,0 +1,5 @@
+bash create-initial-snapshot
+bash configure-initial-snapshot
+bash minimize-initial-snapshot
+bash create-flash-image
+#sid bash test-flash-image
