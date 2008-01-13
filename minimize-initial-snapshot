@@ -6,6 +6,9 @@ export LC_ALL=C
 sudo chroot fs/snapshot/0 apt-get clean
 sudo rm fs/snapshot/0/var/lib/apt/lists/*Packages
 sudo rm -fr fs/snapshot/0/var/cache/apt
+sudo mkdir fs/snapshot/0/var/cache/apt
 sudo rm -fr fs/snapshot/0/usr/share/locale
+sudo mkdir fs/snapshot/0/usr/share/locale
 sudo rm -fr fs/snapshot/0/usr/share/doc
+sudo mkdir fs/snapshot/0/usr/share/doc
 sudo rm -fr fs/snapshot/0/lib/modules/2.6*/kernel/{sound,drivers/media,drivers/isdn,drivers/video}
