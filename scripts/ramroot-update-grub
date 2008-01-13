@@ -18,7 +18,11 @@ fi
 echo -e "default ${default}\ntimeout 10\n" > /flash/boot/grub.menu.lst.new
 
 for i in `cd /flash/snapshot && echo *`; do
-    echo -e "title ${i}\nconfigfile (hd0,0)/snapshot/${i}/boot/grub/menu.lst" >> /flash/boot/grub.menu.lst.new
+    if [ ! -e "/flash/snapshot/${i}/etc/snapshot/info" ]; then
+	title="(snapshot {$i}) /etc/snapshot/info missing!"
+    else
+	title="`cat /flash/snapshot/${i}/etc/snapshot/info`"
+    echo -e "title ${title}\nconfigfile (hd0,0)/snapshot/${i}/boot/grub/menu.lst" >> /flash/boot/grub.menu.lst.new
 done
 
 cleanup
