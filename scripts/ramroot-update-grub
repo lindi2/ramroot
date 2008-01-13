@@ -7,16 +7,17 @@ function cleanup() {
 trap cleanup 1 2 3 15
 default="$1"
 
+if [ ! -d /flash ]; then mkdir /flash; fi
 mount -n /dev/hda1 /flash
 
-if [ ! -d "/snapshot/${default}" ]; then
+if [ ! -d "/flash/snapshot/${default}/boot" ]; then
     echo "default snapshot must exist"
     cleanup
 fi
 
 echo -e "default ${default}\ntimeout 10\n" > /flash/boot/grub.menu.lst.new
 
-for i in `cd /snapshot && echo *`; do
+for i in `cd /flash/snapshot && echo *`; do
     echo -e "title ${i}\nconfigfile (hd0,0)/snapshot/${i}/boot/grub/menu.lst" >> /flash/boot/grub.menu.lst.new
 done
 
