@@ -15,7 +15,7 @@ if [ ! -d "/flash/snapshot/${default}/boot" ]; then
     cleanup
 fi
 
-echo -e "default ${default}\ntimeout 10\n" > /flash/boot/grub.menu.lst.new
+echo -e "default ${default}\ntimeout 10\n" > /flash/boot/grub/menu.lst.new
 
 for i in `cd /flash/snapshot && echo *`; do
     if [ ! -e "/flash/snapshot/${i}/etc/snapshot/info" ]; then
