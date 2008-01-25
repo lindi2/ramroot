@@ -28,7 +28,10 @@ fi
 sudo losetup -o 32256 /dev/loop0 img
 # 65*255*63*512/4096 = 130528
 sudo mkfs -t ext2 -b 4096 /dev/loop0 130528
+rootuuid="`uuidgen`"
+sudo tune2fs -U $rootuuid /dev/loop0
 sudo losetup -d /dev/loop0
+sudo sed -i "/^kernel/s@ro snapshot\$@ro rootuuid=${rootuuid} snapshot@" fs/snapshot/0/boot/grub/menu.lst
 
 sudo mount img mnt -oloop,offset=32256
 sudo cp -a fs/snapshot mnt
