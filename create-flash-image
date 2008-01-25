@@ -3,7 +3,7 @@ set -e
 set -x
 export LC_ALL=C
 
-if [ -e img ]; then rm img; fi
+if [ -e img ]; then rm -f img; fi
 if [ -d mnt ]; then rmdir mnt; fi
 mkdir mnt
 # 512*1024*1024/(512*63*255) = 65
