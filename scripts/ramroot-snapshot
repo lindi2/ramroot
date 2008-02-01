@@ -33,5 +33,5 @@ rm "/flash/snapshot/${new}/boot/grub/menu.lst"
 cp "/flash/snapshot/${old}/boot/grub/menu.lst" "/flash/snapshot/${new}/boot/grub/menu.lst"
 sed -i "s@snapshot=[0-9]*@snapshot=${new}@" /flash/snapshot/${new}/boot/grub/menu.lst
 rm "/flash/snapshot/${new}/etc/snapshot/info"
-echo "${new} `date +"%Y-%m-%d %H:%M"` ${desc}" > /flash/snapshot/${new}/etc/ramroot/grub-title
+echo "#${new} `date +"%Y-%m-%d %H:%M"` ${desc}" > /flash/snapshot/${new}/etc/ramroot/grub-title
 cleanup
