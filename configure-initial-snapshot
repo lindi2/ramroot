@@ -5,8 +5,8 @@ export LC_ALL=C
 
 echo hostname-not-set | sudo tee fs/snapshot/0/etc/hostname
 echo -e "auto lo\niface lo inet loopback\n\nauto eth0\niface eth0 inet dhcp" | sudo tee fs/snapshot/0/etc/network/interfaces
-sudo mkdir -p fs/snapshot/0/etc/snapshot
-echo "`date` (snapshot 0) initial snapshot generated on host `hostname`" | sudo tee fs/snapshot/0/etc/snapshot/info
+sudo mkdir -p fs/snapshot/0/etc/ramroot
+echo "0 `date +"%Y-%m-%d %H:%M"` initial snapshot" | sudo tee fs/snapshot/0/etc/ramroot/grub-title
 sudo mkdir -p fs/snapshot/0/root/.ssh
 sudo cp ~/.ssh/id_dsa.pub fs/snapshot/0/root/.ssh/authorized_keys
 

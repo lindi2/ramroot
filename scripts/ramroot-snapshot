@@ -11,10 +11,15 @@ old="$1"
 new="$2"
 desc="$3"
 
+. /etc/ramroot/last-boot-uuid
+if [ "${last_boot_uuid}" != "" ]; then
+    echo "/etc/ramroot/last-boot-uuid empty?"
+    cleanup
+fi
 if [ ! -d /ram ]; then mkdir /ram; fi
 if [ ! -d /flash ]; then mkdir /flash; fi
 mount -n --bind / /ram
-mount -n /dev/hda1 /flash
+mount -n -U "${last_boot_uuid}" /flash
 if [ ! -d "/flash/snapshot/$old" ]; then
     echo "old snapshot must exist"
     cleanup
@@ -28,5 +33,5 @@ rm "/flash/snapshot/${new}/boot/grub/menu.lst"
 cp "/flash/snapshot/${old}/boot/grub/menu.lst" "/flash/snapshot/${new}/boot/grub/menu.lst"
 sed -i "s@snapshot=[0-9]*@snapshot=${new}@" /flash/snapshot/${new}/boot/grub/menu.lst
 rm "/flash/snapshot/${new}/etc/snapshot/info"
-echo "`date` (snapshot ${new}): $desc" > /flash/snapshot/${new}/etc/snapshot/info
+echo "${new} `date +"%Y-%m-%d %H:%M"` ${desc}" > /flash/snapshot/${new}/etc/ramroot/grub-title
 cleanup

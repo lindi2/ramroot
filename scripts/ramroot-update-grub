@@ -8,7 +8,12 @@ trap cleanup 1 2 3 15
 default="$1"
 
 if [ ! -d /flash ]; then mkdir /flash; fi
-mount -n /dev/hda1 /flash
+. /etc/ramroot/last-boot-uuid
+if [ "${last_boot_uuid}" != "" ]; then
+    echo "/etc/ramroot/last-boot-uuid empty?"
+    cleanup
+fi
+mount -n -U "${last_boot_uuid}" /flash
 
 if [ ! -d "/flash/snapshot/${default}/boot" ]; then
     echo "default snapshot must exist"
@@ -18,10 +23,10 @@ fi
 echo -e "default ${default}\ntimeout 10\n" > /flash/boot/grub/menu.lst.new
 
 for i in `cd /flash/snapshot && echo *`; do
-    if [ ! -e "/flash/snapshot/${i}/etc/snapshot/info" ]; then
-	title="(snapshot {$i}) /etc/snapshot/info missing!"
+    if [ ! -e "/flash/snapshot/${i}/etc/ramroot/grub-title" ]; then
+	title="/snapshot/${i}/etc/ramroot/grub-title not found"
     else
-	title="`cat /flash/snapshot/${i}/etc/snapshot/info`"
+	title="`cat /flash/snapshot/${i}/etc/ramroot/grub-title`"
     echo -e "title ${title}\n configfile (hd0,0)/snapshot/${i}/boot/grub/menu.lst" >> /flash/boot/grub/menu.lst.new
     fi
 done

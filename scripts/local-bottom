@@ -42,5 +42,6 @@ done
 
 echo "snapshot=$snapshot"
 cp -a /fs/snapshot/${snapshot}/* ${rootmnt}
+echo "last_boot_uuid=${rootuuid}" > ${rootmnt}/etc/ramroot/last-boot-uuid
 umount /fs
 rmdir /fs
