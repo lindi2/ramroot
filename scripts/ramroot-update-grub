@@ -9,7 +9,7 @@ default="$1"
 
 if [ ! -d /flash ]; then mkdir /flash; fi
 . /etc/ramroot/last-boot-uuid
-if [ "${last_boot_uuid}" != "" ]; then
+if [ "${last_boot_uuid}" = "" ]; then
     echo "/etc/ramroot/last-boot-uuid empty?"
     cleanup
 fi
