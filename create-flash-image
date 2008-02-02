@@ -27,8 +27,8 @@ if [ ! -e /dev/loop0 ]; then
 fi
 loopdev="`sudo losetup -f`"
 sudo losetup -o 32256 "${loopdev}" img
-# 65*255*63*512/4096 = 130528
-sudo mkfs -t ext2 -b 4096 "${loopdev}" 130528
+# 64*255*63*512/4096 = 130520
+sudo mkfs -t ext2 -b 4096 "${loopdev}" 130520
 rootuuid="`uuidgen`"
 sudo tune2fs -U $rootuuid "${loopdev}"
 sudo losetup -d "${loopdev}"
