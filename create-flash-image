@@ -6,15 +6,15 @@ export LC_ALL=C
 if [ -e img ]; then rm -f img; fi
 if [ -d mnt ]; then rmdir mnt; fi
 mkdir mnt
-# 512*1024*1024/(512*63*255) = 65
-dd if=/dev/zero of=img bs=1M count=0 seek=512
+# 480*1024*1024/(512*63*255) = 61.2
+dd if=/dev/zero of=img bs=1M count=0 seek=480
 set +e
-/sbin/fdisk -C 65 -H 255 -S 63 img <<EOF
+/sbin/fdisk -C 61 -H 255 -S 63 img <<EOF
 n
 p
 1
 1
-65
+61
 a
 1
 w
@@ -27,8 +27,8 @@ if [ ! -e /dev/loop0 ]; then
 fi
 loopdev="`sudo losetup -f`"
 sudo losetup -o 32256 "${loopdev}" img
-# 64*255*63*512/4096 = 130520
-sudo mkfs -t ext2 -b 4096 "${loopdev}" 130520
+# (61-1)*255*63*512/4096 = 120487
+sudo mkfs -t ext2 -b 4096 "${loopdev}" 120487
 ramroot_uuid="`uuidgen`"
 sudo tune2fs -U $ramroot_uuid "${loopdev}"
 sudo losetup -d "${loopdev}"
@@ -46,7 +46,7 @@ sudo umount mnt
 
 grub <<EOF
 device (hd0) img
-geometry (hd0) 65 255 63
+geometry (hd0) 61 255 63
 root (hd0,0)
 setup (hd0)
 quit
