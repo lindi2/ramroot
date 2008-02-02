@@ -47,3 +47,20 @@ size now at 47M
  /scripts/init-bottom
   *kill udev
 
+
+test2:~# fsck /dev/hda1
+fsck 1.40-WIP (14-Nov-2006)
+WARNING: Your /etc/fstab does not contain the fsck passno
+        field.  I will kludge around things for you, but you
+        should fix your /etc/fstab file as soon as you can.
+
+e2fsck 1.40-WIP (14-Nov-2006)
+The filesystem size (according to the superblock) is 130528 blocks
+The physical size of the device is 130520 blocks
+Either the superblock or the partition table is likely to be corrupt!
+Abort<y>?
+
+
+make ramroot size boot option
+make ramroot fs (tmpfs/jffs2) boot option
+
