@@ -1,47 +1,21 @@
 #!/bin/sh
 case "$1" in
-prereqs)
+    prereqs)
 	echo ""
 	exit 0
 	;;
 esac
-
 echo "ramroot: local-bottom"
 set -x
-snapshot=""
-rootuuid=""
-for x in $(cat /proc/cmdline); do
-    case $x in
-	snapshot=*)
-	    snapshot=${x#snapshot=}
-	    ;;
-	rootuuid=*)
-	    rootuuid=${x#rootuuid=}
-	    ;;
-    esac
-done
-
-if [ "${snapshot}" = "" ]; then
-    echo "no snapshot parameter given! dropping to shell"
-    /bin/sh
-    . /conf/param.conf
-fi
-
-if [ "${rootuuid}" = "" ]; then
-    echo "no rootuuid parameter given! dropping to shell"
-    /bin/sh
-    . /conf/param.conf
-fi
-
 mkdir /fs
-while ! mount -n /dev/disk/by-uuid/${rootuuid} /fs; do
+while ! mount -n /dev/disk/by-uuid/${ramroot_uuid} /fs; do
     ls -l /dev/disk/by-uuid
-    echo "== Waiting for ${rootuuid}"
+    echo "== Waiting for ${ramroot_uuid}"
     sleep 2
 done
-
-echo "snapshot=$snapshot"
-cp -a /fs/snapshot/${snapshot}/* ${rootmnt}
-echo "last_boot_uuid=${rootuuid}" > ${rootmnt}/etc/ramroot/last-boot-uuid
+cp -a /fs/snapshot/${ramroot_snapshot}/* ${rootmnt}
+echo "boot_uuid=${ramroot_uuid}" > ${rootmnt}/etc/ramroot/boot-info
+echo "boot_snapshot=${ramroot_snapshot}" >> ${rootmnt}/etc/ramroot/boot-info
 umount /fs
 rmdir /fs
+#/bin/sh

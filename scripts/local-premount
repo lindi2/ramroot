@@ -1,16 +1,20 @@
 #!/bin/sh
 case "$1" in
-prereqs)
+    prereqs)
 	echo ""
 	exit 0
 	;;
 esac
 echo "ramroot: local-premount"
 set -x
-echo FSTYPE=jffs2 > /conf/param.conf
-echo ROOTFLAGS="" >> /conf/param.conf
-echo ROOT=/dev/mtdblock0 >> /conf/param.conf
-echo readonly=n >> /conf/param.conf
-rmmod mtdram
-modprobe mtdram total_size=90000 erase_size=128
-modprobe mtdblock
+echo > /conf/param.conf
+if [ "$ramroot_fs" = "jffs2" ]; then
+    echo FSTYPE=jffs2 > /conf/param.conf
+    echo ROOTFLAGS="" >> /conf/param.conf
+    echo ROOT=/dev/mtdblock0 >> /conf/param.conf
+    echo readonly=n >> /conf/param.conf
+    rmmod mtdram
+    modprobe mtdram total_size=$ramroot_jffs2size erase_size=128
+    modprobe mtdblock
+fi
+#/bin/sh

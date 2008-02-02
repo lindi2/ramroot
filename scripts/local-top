@@ -1,11 +1,19 @@
 #!/bin/sh
 case "$1" in
-prereqs)
+    prereqs)
 	echo ""
 	exit 0
 	;;
 esac
 echo "ramroot: local-top"
 set -x
-echo ROOT=/dev/mtdblock0 > /conf/param.conf
-
+echo > /conf/param.conf
+for x in $(cat /proc/cmdline); do
+    case $x in
+	ramroot_*=*)
+	    echo "$x" >> /conf/param.conf
+	    ;;
+    esac
+done
+echo ROOT=/dev/null >> /conf/param.conf
+#/bin/sh
