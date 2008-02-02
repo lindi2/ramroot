@@ -14,7 +14,14 @@ if [ "$ramroot_fs" = "jffs2" ]; then
     echo ROOT=/dev/mtdblock0 >> /conf/param.conf
     echo readonly=n >> /conf/param.conf
     rmmod mtdram
-    modprobe mtdram total_size=$ramroot_jffs2size erase_size=128
+    modprobe mtdram total_size=$ramroot_fs_size erase_size=128
     modprobe mtdblock
+fi
+if [ "$ramroot_fs" = "tmpfs" ]; then
+    size=`expr $ramroot_fs_size '*' 1024`
+    echo FSTYPE=tmpfs > /conf/param.conf
+    echo ROOTFLAGS=-osize=$size >> /conf/param.conf
+    echo ROOT=none >> /conf/param.conf
+    echo readonly=n >> /conf/param.conf
 fi
 #/bin/sh

@@ -36,7 +36,7 @@ sudo losetup -d "${loopdev}"
 sudo mkdir -p fs/snapshot/0/boot/grub
 echo y | sudo chroot fs/snapshot/0 update-grub
 sudo sed -i s@/boot@/snapshot/0/boot@ fs/snapshot/0/boot/grub/menu.lst
-sudo sed -i "/^kernel/s@ro \$@ro ramroot_uuid=${ramroot_uuid} ramroot_snapshot=0 ramroot_fs=jffs2 ramroot_jffs2size=90000 @" fs/snapshot/0/boot/grub/menu.lst
+sudo sed -i "/^kernel/s@ro \$@ro ramroot_uuid=${ramroot_uuid} ramroot_snapshot=0 ramroot_fs=jffs2 ramroot_fs_size=90000 @" fs/snapshot/0/boot/grub/menu.lst
 
 sudo mount img mnt -oloop,offset=32256
 sudo cp -a fs/snapshot mnt
