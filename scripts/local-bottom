@@ -8,7 +8,7 @@ esac
 echo "ramroot: local-bottom"
 set -x
 mkdir /fs
-while ! mount -n /dev/disk/by-uuid/${ramroot_uuid} /fs; do
+while ! mount -n -oro /dev/disk/by-uuid/${ramroot_uuid} /fs; do
     ls -l /dev/disk/by-uuid
     echo "== Waiting for ${ramroot_uuid}"
     sleep 2
