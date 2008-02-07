@@ -8,6 +8,7 @@ esac
 echo "ramroot: local-bottom"
 set -x
 mkdir /fs
+modprobe ext2 # not loaded automatically on amd64?
 while ! mount -n -oro /dev/disk/by-uuid/${ramroot_uuid} /fs; do
     ls -l /dev/disk/by-uuid
     echo "== Waiting for ${ramroot_uuid}"
