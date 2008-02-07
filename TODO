@@ -3,6 +3,9 @@ http://osdir.com/ml/handhelds.linux.intimate/2001-07/msg00005.html
 http://jbakshi.50webs.com/Linux_tutorial/GRUB/grubmain.html
 http://gentoo-wiki.com/HOWTO_Small_Footprint_Gentoo_on_USB
 
+watchdog
+--------
+
 modprobe softdog nowayout=1
 mknod /dev/watchdog c 10 130
 echo V > /dev/watchdog
@@ -21,19 +24,13 @@ title 2
 
 grub-set-default
 
-rsync --numeric-ids -ax --delete --link-dest=../0 /live/ /saved/snapshot/1
+other
+-----
 
-# ls -il  /saved/snapshot/{0,1}/bin/bash
-124931 -rwxr-xr-x 2 root root 677184 Dec 11  2006 /saved/snapshot/0/bin/bash
-124931 -rwxr-xr-x 2 root root 677184 Dec 11  2006 /saved/snapshot/1/bin/bash
-
-# ls -il  /saved/snapshot/{0,1}/var/lib/dpkg/available
- 6147 -rw-r--r-- 1 root root  99477 Jan 11 19:51 /saved/snapshot/0/var/lib/dpkg/available
-55315 -rw-r--r-- 1 root root 101750 Jan 12 15:35 /saved/snapshot/1/var/lib/dpkg/available
-
-size now at 47M
-- get rid of netbase
-
+testcases
+ fsck
+documentation
+licenses
 
 /init
  /scripts/functions
@@ -46,21 +43,3 @@ size now at 47M
   /scripts/local-bottom
  /scripts/init-bottom
   *kill udev
-
-
-test2:~# fsck /dev/hda1
-fsck 1.40-WIP (14-Nov-2006)
-WARNING: Your /etc/fstab does not contain the fsck passno
-        field.  I will kludge around things for you, but you
-        should fix your /etc/fstab file as soon as you can.
-
-e2fsck 1.40-WIP (14-Nov-2006)
-The filesystem size (according to the superblock) is 130528 blocks
-The physical size of the device is 130520 blocks
-Either the superblock or the partition table is likely to be corrupt!
-Abort<y>?
-
-
-make ramroot size boot option
-make ramroot fs (tmpfs/jffs2) boot option
-
