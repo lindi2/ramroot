@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+set -x
+target="$1"
+run="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l root $target"
+export LC_ALL=C
+
+[ "`$run hostname`" = "hostname-not-set" ]
+$run [ -d /etc/ramroot ]
+[ "`$run '. /etc/ramroot/boot-info; fsck -n /dev/disk/by-uuid/$boot_uuid'|grep ": clean,"`" != "" ]
+$run ramroot-aptkludge start
+$run apt-get update
+$run apt-get -y --force-yes install rsync
+$run "echo phase1 > /etc/hostname"
+$run ramroot-snapshot 0 1 phase1
+$run ramroot-update-grub 1
+$run shutdown -r now
+while [ "`$run echo hello`" != "hello" ]; do
+    sleep 4
+done
+[ "`$run hostname`" = "phase1" ]
+$run ramroot-update-grub 0
+$run shutdown -r now
+while [ "`$run echo hello`" != "hello" ]; do
+    sleep 4
+done
+[ "`$run hostname`" = "hostname-not-set" ]
