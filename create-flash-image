@@ -29,7 +29,7 @@ loopdev="`sudo losetup -f`"
 sudo losetup -o 32256 "${loopdev}" img
 # (61-1)*255*63*512/4096 = 120487
 sudo mkfs -t ext2 -b 4096 "${loopdev}" 120487
-ramroot_uuid="`uuidgen | sed 's@^........-....-....@962d307f-8f1f-4301@`"
+ramroot_uuid="`uuidgen | sed 's@^........-....-....@962d307f-8f1f-4301@'`"
 sudo tune2fs -U $ramroot_uuid "${loopdev}"
 sudo losetup -d "${loopdev}"
 
