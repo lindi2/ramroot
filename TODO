@@ -1,10 +1,26 @@
-http://www.iro.umontreal.ca/~monnier/gnu-linux/debian-live-usb
-http://osdir.com/ml/handhelds.linux.intimate/2001-07/msg00005.html
-http://jbakshi.50webs.com/Linux_tutorial/GRUB/grubmain.html
-http://gentoo-wiki.com/HOWTO_Small_Footprint_Gentoo_on_USB
+failsafe scenarios
+------------------
 
-watchdog
---------
+1) user does apt-get dist-upgrade that upgrades glibc
+2) user is aware of potential trouble and tells ramroot "save state as
+snapshot 8 and boot it. If I don't ssh within 10 minutes reboot
+snapshot 7".
+
+1) user starts to configure things
+2) power outage hits
+3) unsaved changes are lost but system boots from latest saved snapshot
+
+1) user changes firewall settings
+2) user notices he has locked himself out!
+
+1) user makes a small change
+2) user saves state as snapshot 8
+3) user thinks the change is small and doesn't want to reboot
+4) power outage hits 30 days later
+5) systems reboots but snapshot 8 is not bootable!
+
+failsafe implementation
+-----------------------
 
 modprobe softdog nowayout=1
 mknod /dev/watchdog c 10 130
@@ -24,13 +40,13 @@ title 2
 
 grub-set-default
 
-other
------
 
-testcases
- fsck
-documentation
+
+misc
+----
+
 licenses
+documentation
 
 /init
  /scripts/functions
@@ -43,3 +59,19 @@ licenses
   /scripts/local-bottom
  /scripts/init-bottom
   *kill udev
+
+
+progress meter for cp?
+how to get to shell easily?
+virtual consoles?
+
+add tests for new features
+
+
+references
+----------
+
+http://www.iro.umontreal.ca/~monnier/gnu-linux/debian-live-usb
+http://osdir.com/ml/handhelds.linux.intimate/2001-07/msg00005.html
+http://jbakshi.50webs.com/Linux_tutorial/GRUB/grubmain.html
+http://gentoo-wiki.com/HOWTO_Small_Footprint_Gentoo_on_USB
