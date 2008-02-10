@@ -26,7 +26,7 @@ if [ -d "/flash/snapshot/$new" ]; then
 fi
 rsync --numeric-ids -ax --delete --link-dest=../${old} /ram/ /flash/snapshot/${new}
 rm "/flash/snapshot/${new}/boot/grub/menu.lst"
-cp "/flash/snapshot/${old}/boot/grub/menu.lst" "/flash/snapshot/${new}/boot/grub/menu.lst"
+cp "/ram/boot/grub/menu.lst" "/flash/snapshot/${new}/boot/grub/menu.lst"
 sed -i "s@ramroot_snapshot=[0-9]*@ramroot_snapshot=${new}@" /flash/snapshot/${new}/boot/grub/menu.lst
 rm "/flash/snapshot/${new}/etc/ramroot/grub-title"
 echo "#${new} `date +"%Y-%m-%d %H:%M"` ${desc}" > /flash/snapshot/${new}/etc/ramroot/grub-title
