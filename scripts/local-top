@@ -9,6 +9,7 @@ echo "ramroot: local-top"
 set -x
 echo > /conf/param.conf
 # defaults
+echo "ramroot_uuid=962d307f-8f1f-4301*"
 echo "ramroot_snapshot=0"
 echo "ramroot_fs=jffs2"
 echo "ramroot_fs_size=90000"
