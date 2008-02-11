@@ -19,6 +19,14 @@ snapshot 7".
 4) power outage hits 30 days later
 5) systems reboots but snapshot 8 is not bootable!
 
+
+1) upgrade glibc
+2) ramroot-snapshot 7 8 'glibc upgrade'
+3) ramroot-update-grub --default 8 --failsafe 7 --failsafe-timeout 10
+4) reboot
+5) ramroot-stop-watchdog
+6) ramroot-update-grub --default 8
+
 failsafe implementation
 -----------------------
 
@@ -67,6 +75,7 @@ virtual consoles?
 
 add tests for new features
 
+improve boot time
 
 references
 ----------
