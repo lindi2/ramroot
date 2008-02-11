@@ -9,14 +9,14 @@ echo "ramroot: local-top"
 set -x
 echo > /conf/param.conf
 # defaults
-echo "ramroot_uuid=962d307f-8f1f-4301*"
-echo "ramroot_snapshot=0"
-echo "ramroot_fs=jffs2"
-echo "ramroot_fs_size=90000"
+echo "export ramroot_uuid=962d307f-8f1f-4301*" >> /conf/param.conf
+echo "export ramroot_snapshot=0" >> /conf/param.conf
+echo "export ramroot_fs=jffs2" >> /conf/param.conf
+echo "export ramroot_fs_size=90000" >> /conf/param.conf
 for x in $(cat /proc/cmdline); do
     case $x in
 	ramroot_*=*)
-	    echo "$x" >> /conf/param.conf
+	    echo "export $x" >> /conf/param.conf
 	    ;;
     esac
 done
