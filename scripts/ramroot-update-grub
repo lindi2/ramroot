@@ -30,11 +30,19 @@ fi
 for i in `cd $ramroot/snapshot && echo *`; do
     title="`cat $ramroot/snapshot/$i/etc/ramroot/grub-title`"
     echo "title $title" >> $newlst
+    extraopts=" ramroot_uuid=$boot_uuid ramroot_snapshot=$i panic=60"
+    if [ "$fallback" != "" -a "$i" = "$default" ]; then
+	extraopts+=" ramroot_watchdog=$fallback_timeout"
+    fi
     grep -E "^(kernel|initrd)" $ramroot/snapshot/$i/boot/grub/menu.lst\
     | head -n 2\
     | sed "s@^@ @;s@/boot/@/snapshot/$i/boot/@;s@ root=/dev/hda1 ro @ @"\
-    | sed "/^ kernel/s@\$@ ramroot_uuid=$boot_uuid ramroot_snapshot=$i@"\
+    | sed "/^ kernel/s@\$@$extraopts@"\
     >> $newlst
+    if [ "$fallback" != "" -a "$i" = "$default" ]; then
+	echo "safedefault fallback" >> $newlst
+    fi
+	
     echo >> $newlst
 done
 

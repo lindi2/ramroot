@@ -11,3 +11,4 @@
 mtdram
 mtdblock
 jffs2
+softdog

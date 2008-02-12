@@ -21,4 +21,8 @@ for x in $(cat /proc/cmdline); do
     esac
 done
 echo ROOT=/dev/null >> /conf/param.conf
+if [ "$ramroot_watchdog" != "" ]; then
+    rmmod softdog
+    modprobe softdog soft_margin=$ramroot_watchdog
+fi
 #/bin/sh
