@@ -49,6 +49,12 @@ title 2
 grub-set-default
 
 
+tools
+-----
+
+ramroot-admin CMD
+ramroot-snapshot PREV NUM DESC
+ramroot-update-grub DEFAULT FALLBACK FALLBACK-TIMEOUT
 
 misc
 ----
