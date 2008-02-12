@@ -1,31 +1,43 @@
 #!/bin/sh
-function cleanup() {
-    umount /flash
-    rmdir /flash
-    exit 0
-}
-trap cleanup 1 2 3 15
-default="$1"
-
-if [ ! -d /flash ]; then mkdir /flash; fi
-. /etc/ramroot/boot-info
-mount -n -U "${boot_uuid}" /flash
-
-if [ ! -d "/flash/snapshot/${default}/boot" ]; then
-    echo "default snapshot must exist"
-    cleanup
+if [ "$ramroot" = "" ]; then
+    echo "Use only with ramroot-admin"
+    exit 1
 fi
 
-echo -e "default ${default}\ntimeout 10\n" > /flash/boot/grub/menu.lst.new
+default="$1"
+fallback="$2"
+fallback_timeout="$3"
 
-for i in `cd /flash/snapshot && echo *`; do
-    if [ ! -e "/flash/snapshot/${i}/etc/ramroot/grub-title" ]; then
-	title="/snapshot/${i}/etc/ramroot/grub-title not found"
-    else
-	title="`cat /flash/snapshot/${i}/etc/ramroot/grub-title`"
-    echo -e "title ${title}\n configfile (hd0,0)/snapshot/${i}/boot/grub/menu.lst" >> /flash/boot/grub/menu.lst.new
-    fi
+if [ ! -d "$ramroot/snapshot/${default}/boot" ]; then
+    echo "Default snapshot does not exist"
+    exit 1
+fi
+
+newlst=`mktemp`
+
+echo "timeout 10" >> $newlst
+echo "root (hd0,0)" >> $newlst
+if [ "$fallback" != "" ]; then
+    echo "default saved" >> $newlst
+    echo "fallback $fallback" >> $newlst
+else
+    echo "default $default" >> $newlst
+fi
+
+if [ -e /etc/ramroot/boot-info ]; then
+    . /etc/ramroot/boot-info
+fi
+for i in `cd $ramroot/snapshot && echo *`; do
+    title="`cat $ramroot/snapshot/$i/etc/ramroot/grub-title`"
+    echo "title $title" >> $newlst
+    grep -E "^(kernel|initrd)" $ramroot/snapshot/$i/boot/grub/menu.lst\
+    | head -n 2\
+    | sed "s@^@ @;s@/boot/@/snapshot/$i/boot/@;s@ root=/dev/hda1 ro @ @"\
+    | sed "/^ kernel/s@\$@ ramroot_uuid=$boot_uuid ramroot_snapshot=$i@"\
+    >> $newlst
+    echo >> $newlst
 done
-mv /flash/boot/grub/menu.lst.new /flash/boot/grub/menu.lst
 
-cleanup
+mount -o remount,rw $ramroot
+mv $newlst $ramroot/boot/grub/menu.lst
+mount -o remount,ro $ramroot
