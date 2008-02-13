@@ -24,5 +24,7 @@ echo ROOT=/dev/null >> /conf/param.conf
 if [ "$ramroot_watchdog" != "" ]; then
     rmmod softdog
     modprobe softdog soft_margin=$ramroot_watchdog
+    mknod /dev/watchdog c 10 130
+    echo -n S > /dev/watchdog
 fi
 #/bin/sh
