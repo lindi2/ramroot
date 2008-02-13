@@ -1,3 +1,30 @@
+runtime: improve default hostname to something more descriptive,
+something that mentions ramroot?
+
+doc: /etc/ramroot
+
+doc: authorized_keys
+
+doc: /etc/initramfs-tools
+
+doc: /usr/local/bin
+
+build: configuration file?
+
+build: automate fetching sources for binaries on image
+
+build: make size of flash image configurable
+
+doc: document use of special uuid space
+
+?: log boot time to /etc/ramroot, benchmark different options
+
+build: add more tests
+
+?: make it possible to access shell if cp takes a long time on bootup
+
+
+
 failsafe scenarios
 ------------------
 
@@ -27,66 +54,13 @@ snapshot 7".
 5) ramroot-stop-watchdog
 6) ramroot-update-grub --default 8
 
-failsafe implementation
------------------------
-
-modprobe softdog nowayout=1
-mknod /dev/watchdog c 10 130
-echo V > /dev/watchdog
-
-default saved
-fallback 1 2
-
-title 0
- configfile (hd0,1)/snapshots/0/boot/menu.lst
- savedefault fallback
-title 1
- configfile (hd0,1)/snapshots/1/boot/menu.lst
- savedefault fallback
-title 2
- configfile (hd0,1)/snapshots/2/boot/menu.lst
-
-grub-set-default
-
-
-tools
------
 
 ramroot-admin CMD
 ramroot-snapshot PREV NUM DESC
 ramroot-update-grub DEFAULT FALLBACK FALLBACK-TIMEOUT
 
-misc
-----
-
-licenses
-documentation
-
-/init
- /scripts/functions
- /scripts/init-top
- /scripts/init-premount
- /scripts/local
- mountroot()
-  /scripts/local-top
-  /scripts/local-premount
-  /scripts/local-bottom
- /scripts/init-bottom
-  *kill udev
-
-
-progress meter for cp?
-how to get to shell easily?
-virtual consoles?
-
-add tests for new features
-
-improve boot time
-
-references
-----------
-
 http://www.iro.umontreal.ca/~monnier/gnu-linux/debian-live-usb
 http://osdir.com/ml/handhelds.linux.intimate/2001-07/msg00005.html
 http://jbakshi.50webs.com/Linux_tutorial/GRUB/grubmain.html
 http://gentoo-wiki.com/HOWTO_Small_Footprint_Gentoo_on_USB
+
