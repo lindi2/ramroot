@@ -57,9 +57,13 @@ echo >> $newlst
 cat $entries >> $newlst
 rm $entries
 
-mount -o remount,rw $ramroot
+if [ "$ramroot_build" = "" ]; then
+    mount -o remount,rw $ramroot
+fi
 mv $newlst $ramroot/boot/grub/menu.lst
 if [ "$fallback" != "" ]; then
     grub-set-default --root-directory=$ramroot $default
 fi
-mount -o remount,ro $ramroot
+if [ "$ramroot_build" = "" ]; then
+    mount -o remount,ro $ramroot
+fi

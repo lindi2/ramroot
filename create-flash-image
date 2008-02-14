@@ -55,12 +55,6 @@ quit
 EOF
 
 sudo mount img mnt -oloop,offset=32256
-sudo mount --bind mnt mnt/snapshot/0/mnt
-sudo cp mnt/snapshot/0/etc/mtab mnt/snapshot/0/etc/mtab.real
-echo "/dev/null /mnt none ro,bind 0 0" | sudo tee -a mnt/snapshot/0/etc/mtab
-sudo sh -c "ramroot=/mnt boot_uuid=$ramroot_uuid chroot mnt/snapshot/0 ramroot-update-grub 0"
-sudo umount mnt/snapshot/0/mnt
-sudo mount mnt -oremount,rw
-sudo mv mnt/snapshot/0/etc/mtab.real mnt/snapshot/0/etc/mtab
+sudo sh -c "ramroot_build=1 ramroot=mnt boot_uuid=$ramroot_uuid mnt/snapshot/0/usr/local/bin/ramroot-update-grub 0"
 sudo umount mnt
 rmdir mnt
