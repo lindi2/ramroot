@@ -31,14 +31,16 @@ $run shutdown -r now
 while [ "`$run hostname`" != "phase1" ]; do
     sleep 10;
 done
-$run sed -i '/^kernel/s@ramroot_uuid=[^\ ]*@@' /boot/grub/menu.lst
 $run "echo phase2 > /etc/hostname"
 $run ramroot-snapshot 1 2 "phase2"
-$run ramroot-update-grub 2
+$run ramroot-update-grub 2 1 300
 $run shutdown -r now
 while [ "`$run hostname`" != "phase2" ]; do
     sleep 10;
 done
-[ "`$run grep ramroot_uuid /proc/cmdline`" = "" ]
+$run ifconfig eth0 down
+while [ "`$run hostname`" != "phase1" ]; do
+    sleep 10;
+done
 rm $known_hosts
 echo OK
