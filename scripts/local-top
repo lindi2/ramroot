@@ -11,8 +11,15 @@ echo > /conf/param.conf
 # defaults
 echo "export ramroot_uuid=962d307f-8f1f-4301*" >> /conf/param.conf
 echo "export ramroot_snapshot=0" >> /conf/param.conf
-echo "export ramroot_fs=jffs2" >> /conf/param.conf
-echo "export ramroot_fs_size=90000" >> /conf/param.conf
+mem="`free | grep Mem: | awk '{ print $2 }'`"
+if [ $mem -lt 180000 ]; then
+    echo "export ramroot_fs=jffs2" >> /conf/param.conf
+    echo "export ramroot_fs_size=90000" >> /conf/param.conf
+else
+    fs_size="`expr $mem - 10000`"
+    echo "export ramroot_fs=tmpfs" >> /conf/param.conf
+    echo "export ramroot_fs_size=$fs_size" >> /conf/param.conf
+fi
 for x in $(cat /proc/cmdline); do
     case $x in
 	ramroot_*=*)
