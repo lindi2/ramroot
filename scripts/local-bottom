@@ -18,7 +18,7 @@ for i in /fs/snapshot/${ramroot_snapshot}/*; do
     cp -a $i ${rootmnt}
 done
 boot_uuid="`(cd /dev/disk/by-uuid; echo $ramroot_uuid)`"
-echo "boot_uuid=${ramroot_uuid}" > ${rootmnt}/etc/ramroot/boot-info
+echo "boot_uuid=${root_uuid}" > ${rootmnt}/etc/ramroot/boot-info
 echo "boot_snapshot=${ramroot_snapshot}" >> ${rootmnt}/etc/ramroot/boot-info
 echo "boot_uptime=`cut -d' ' -f1 /proc/uptime`" >> ${rootmnt}/etc/ramroot/boot-info
 umount /fs
