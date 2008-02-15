@@ -57,6 +57,11 @@ echo >> $newlst
 cat $entries >> $newlst
 rm $entries
 
+if ! grep initrd $newlst > /dev/null; then
+    echo incomplete menu.lst
+    exit 1
+fi
+
 if [ "$ramroot_build" = "" ]; then
     mount -o remount,rw $ramroot
 fi
