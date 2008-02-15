@@ -1,38 +1,30 @@
 dhclient should try forever
 handle multiple ethernets
-if rootfs is full, do not write empty menu.lst
-boot_uuid can have *?
+*if rootfs is full, do not write empty menu.lst
+*boot_uuid can have *?
 mtdram total_size=300000
-allocation failed: out of vmalloc space - use vmalloc=<size> to increase size.
+ allocation failed: out of vmalloc space - use vmalloc=<size> to increase size.
+finnish keyboard layout
+is there a way to make usb stick read-only under linux?
+detect memory size, use jffs2 for < 180M, tmpfs for others
 
+http://lwn.net/Articles/219827/
 
 runtime: change default hostname to something more descriptive,
 something that mentions ramroot?
 
 doc: /etc/ramroot
-
 doc: authorized_keys
-
 doc: /etc/initramfs-tools
-
 doc: /usr/local/bin
 
 build: configuration file?
-
 build: automate fetching sources for binaries on image
-
 build: make size of flash image configurable
-
 doc: document use of special uuid space
-
-?: log boot time to /etc/ramroot, benchmark different options
-
 build: add more tests
 
 ?: make it possible to access shell if cp takes a long time on bootup
-
-boot time
-161s with jffs2
 
 doc:
 ramroot-admin CMD
