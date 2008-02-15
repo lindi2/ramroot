@@ -15,30 +15,30 @@ $run ramroot-aptkludge start
 $run apt-get update
 $run apt-get -y --force-yes install rsync
 $run "echo phase1 > /etc/hostname"
-$run ramroot-snapshot 0 1 phase1
-$run ramroot-update-grub 1
+$run ramroot-admin ramroot-snapshot 0 1 phase1
+$run ramroot-admin ramroot-update-grub 1
 $run shutdown -r now
 while [ "`$run hostname`" != "phase1" ]; do
     sleep 10;
 done
-$run ramroot-update-grub 0
+$run ramroot-admin ramroot-update-grub 0
 $run shutdown -r now
 while [ "`$run hostname`" != "hostname-not-set" ]; do
     sleep 10;
 done
-$run ramroot-update-grub 1
+$run ramroot-admin ramroot-update-grub 1
 $run shutdown -r now
 while [ "`$run hostname`" != "phase1" ]; do
     sleep 10;
 done
 $run "echo phase2 > /etc/hostname"
-$run ramroot-snapshot 1 2 "phase2"
-$run ramroot-update-grub 2 1 300
+$run ramroot-admin ramroot-snapshot 1 2 "phase2"
+$run ramroot-admin ramroot-update-grub 2 1 300
 $run shutdown -r now
 while [ "`$run hostname`" != "phase2" ]; do
     sleep 10;
 done
-$run ifconfig eth0 down
+$run killall sshd
 while [ "`$run hostname`" != "phase1" ]; do
     sleep 10;
 done
