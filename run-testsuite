@@ -13,7 +13,7 @@ $run [ -d /etc/ramroot ]
 [ "`$run '. /etc/ramroot/boot-info; fsck -n /dev/disk/by-uuid/$boot_uuid'|grep ": clean,"`" != "" ]
 $run ramroot-aptkludge start
 $run apt-get update
-$run apt-get -y --force-yes install rsync
+$run apt-get -y --force-yes install rsync psmisc
 $run "echo phase1 > /etc/hostname"
 $run ramroot-admin ramroot-snapshot 0 1 phase1
 $run ramroot-admin ramroot-update-grub 1
