@@ -66,3 +66,5 @@ http://osdir.com/ml/handhelds.linux.intimate/2001-07/msg00005.html
 http://jbakshi.50webs.com/Linux_tutorial/GRUB/grubmain.html
 http://gentoo-wiki.com/HOWTO_Small_Footprint_Gentoo_on_USB
 
+
+mount -t unionfs -o dirs=/branch_rw=rw:/branch_ro=ro unionfs /union
