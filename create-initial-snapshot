@@ -24,3 +24,13 @@ else
     add+=" linux-image-2.6-486"
 fi
 echo -e "n\nn" | sudo chroot fs/snapshot/0 apt-get --force-yes -y install $add
+sudo tee fs/snapshot/0/etc/kernel-img.conf <<EOF
+do_symlinks = yes
+relative_links = yes
+do_bootloader = no
+do_bootfloppy = no
+do_initrd = yes
+link_in_boot = no
+postinst_hook = /usr/sbin/update-grub
+postrm_hook   = /usr/sbin/update-grub
+EOF
