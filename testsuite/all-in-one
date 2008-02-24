@@ -6,11 +6,16 @@ target="$1"
 known_hosts="`mktemp`"
 run="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$known_hosts -l root $target"
 
+# check that we are talking to a real ramroot system
 while [ "`$run hostname`" != "hostname-not-set" ]; do
     sleep 10;
 done
 $run [ -d /etc/ramroot ]
+
+# check filesystem
 [ "`$run '. /etc/ramroot/boot-info; fsck -n /dev/disk/by-uuid/$boot_uuid'|grep ": clean,"`" != "" ]
+
+# create a snapshot and boot to it
 $run ramroot-aptkludge start
 $run apt-get update
 $run apt-get -y --force-yes install rsync psmisc
@@ -21,16 +26,22 @@ $run shutdown -r now
 while [ "`$run hostname`" != "phase1" ]; do
     sleep 10;
 done
+
+# boot back to initial snapshot
 $run ramroot-admin ramroot-update-grub 0
 $run shutdown -r now
 while [ "`$run hostname`" != "hostname-not-set" ]; do
     sleep 10;
 done
+
+# boot again to snapshot 1
 $run ramroot-admin ramroot-update-grub 1
 $run shutdown -r now
 while [ "`$run hostname`" != "phase1" ]; do
     sleep 10;
 done
+
+# create snapshot 2 and boot to it with watchdog fallback
 $run "echo phase2 > /etc/hostname"
 $run ramroot-admin ramroot-snapshot 1 2 "phase2"
 $run ramroot-admin ramroot-update-grub 2 1 300
@@ -38,9 +49,28 @@ $run shutdown -r now
 while [ "`$run hostname`" != "phase2" ]; do
     sleep 10;
 done
-$run killall sshd
+
+# kill sshd and wait for watchdog to save us
+$run killall sshd || true
 while [ "`$run hostname`" != "phase1" ]; do
     sleep 10;
 done
+
+# test that we can install a new kernel
+$run ramroot-aptkludge start
+$run apt-get update
+$run apt-get -y --force-yes install linux-image-2.6-686
+$run grep 686 /boot/grub/menu.lst
+
+# reboot to the new kernel
+$run "echo phase3 > /etc/hostname"
+$run ramroot-admin ramroot-snapshot 2 3 "phase3"
+$run ramroot-admin ramroot-update-grub 3
+$run shutdown -r now
+while [ "`$run hostname`" != "phase3" ]; do
+    sleep 10;
+done
+[ "`$run uname -r | grep 686`" != "" ]
+
 rm $known_hosts
 echo OK
