@@ -68,3 +68,5 @@ http://gentoo-wiki.com/HOWTO_Small_Footprint_Gentoo_on_USB
 
 
 mount -t unionfs -o dirs=/branch_rw=rw:/branch_ro=ro unionfs /union
+
+serial console?
