@@ -1,3 +1,6 @@
+todo
+----
+
 dhclient should try forever
 handle multiple ethernets
 *if rootfs is full, do not write empty menu.lst
@@ -23,6 +26,7 @@ build: automate fetching sources for binaries on image
 build: make size of flash image configurable
 doc: document use of special uuid space
 build: add more tests
+serial console?
 
 ?: make it possible to access shell if cp takes a long time on bootup
 
@@ -61,12 +65,92 @@ snapshot 7".
 5) ramroot-stop-watchdog
 6) ramroot-update-grub --default 8
 
+
+urls
+----
+
 http://www.iro.umontreal.ca/~monnier/gnu-linux/debian-live-usb
 http://osdir.com/ml/handhelds.linux.intimate/2001-07/msg00005.html
 http://jbakshi.50webs.com/Linux_tutorial/GRUB/grubmain.html
 http://gentoo-wiki.com/HOWTO_Small_Footprint_Gentoo_on_USB
 
 
+
+
+unionfs
+-------
+
 mount -t unionfs -o dirs=/branch_rw=rw:/branch_ro=ro unionfs /union
 
-serial console?
+
+compFUSEd
+---------
+
+apt-get install libfuse2 liblzo2-2 fuse-utils ucf
+dpkg -i compfused_0.1cvs200712321-1_i386.deb
+
+# local-top
+ramroot_fs=compfused >> /conf/param.conf
+
+# premount
+modprobe fuse
+mkdir /tmpfs
+mount none /tmpfs -t tmpfs
+cp /etc/compfused.conf /.compFUSEd
+compfused /root
+echo FSTYPE=dummy > /conf/param.conf
+echo ROOTFLAGS= >> /conf/param.conf
+echo ROOT=none >> /conf/param.conf
+echo readonly=n >> /conf/param.conf
+#copy_exec /usr/bin/fusermount /sbin
+mount -n -o move /compfused /root
+mkdir /root/tmpfs
+mount -n -o move /tmpfs /root/tmpfs
+
+
+fusecompress
+------------
+
+sudo mount -t tmpfs -o size=512M none /tmpfs
+sudo fusecompress -o default_permissions,allow_other /tmpfs /fusecompress
+sudo mount --bind /dev/ /fusecompress/dev
+sudo debootstrap etch /fusecompress http://apt-proxy.kurp.hut.fi:9999/debian
+
+$ sudo chroot /fusecompress
+root@colosseum:/# apt-get update
+Get:1 http://apt-proxy.kurp.hut.fi etch Release.gpg [378B]
+Hit http://apt-proxy.kurp.hut.fi etch Release
+Ign http://apt-proxy.kurp.hut.fi etch/main Packages/DiffIndex
+Hit http://apt-proxy.kurp.hut.fi etch/main Packages
+Fetched 378B in 0s (1586B/s)
+Reading package lists... Error!
+E: Couldn't make mmap of 12582912 bytes - mmap (19 No such device)
+W: Unable to munmap
+E: Problem closing the file - close (107 Transport endpoint is not connected)
+E: The package lists or status file could not be parsed or opened.
+E: Problem closing the file - close (107 Transport endpoint is not connected)
+
+
+$ sudo ls /fusecompress
+ls: /fusecompress: Transport endpoint is not connected
+
+
+(gdb) bt
+#0  0xb7d2a947 in raise () from /lib/tls/libc.so.6
+#1  0xb7d2c0c9 in abort () from /lib/tls/libc.so.6
+#2  0xb7f17994 in __gnu_cxx::__verbose_terminate_handler () from /usr/lib/libstdc++.so.6
+#3  0xb7f153b5 in std::set_unexpected () from /usr/lib/libstdc++.so.6
+#4  0xb7f153f2 in std::terminate () from /usr/lib/libstdc++.so.6
+#5  0xb7f1552a in __cxa_throw () from /usr/lib/libstdc++.so.6
+#6  0xb7f1596b in operator new () from /usr/lib/libstdc++.so.6
+#7  0xb7f15a3d in operator new[] () from /usr/lib/libstdc++.so.6
+#8  0x0804fd28 in MemoryMap::truncate (this=0x807924c, size=0) at MemoryMap.hpp:18
+#9  0x0804c1c5 in Memory::truncate (this=0x8079210, name=0x8077af9 "var/cache/apt/pkgcache.bin", size=0) at Memory.cpp:61
+#10 0x0804b138 in FuseCompress::truncate (name=<value optimized out>, size=0) at FuseCompress.cpp:391
+#11 0xb7f932c4 in fuse_new () from /usr/lib/libfuse.so.2
+#12 0xb7f97402 in fuse_reply_readlink () from /usr/lib/libfuse.so.2
+#13 0xb7f987c6 in fuse_session_process () from /usr/lib/libfuse.so.2
+#14 0xb7f959a9 in fuse_session_loop () from /usr/lib/libfuse.so.2
+#15 0xb7f730bd in start_thread () from /lib/tls/libpthread.so.0
+#16 0xb7dce01e in clone () from /lib/tls/libc.so.6
+
