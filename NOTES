@@ -1,6 +1,7 @@
 todo
 ----
 
+root on hda2
 dhclient should try forever
 handle multiple ethernets
 *if rootfs is full, do not write empty menu.lst
@@ -107,6 +108,20 @@ mount -n -o move /compfused /root
 mkdir /root/tmpfs
 mount -n -o move /tmpfs /root/tmpfs
 
++if [ "$ramroot_fs" = "compfused" ]; then
++    modprobe fuse
++    mkdir /tmpfs
++    mount none /tmpfs -t tmpfs
++    cp /etc/compfused.conf /.compFUSEd
++    sed -i s@/usr/src/@/root/@ /.compFUSEd
++    sed -i s@/usr/cf_src@/tmpfs@ /.compFUSEd
++    compfused /root
++    echo FSTYPE=dummy > /conf/param.conf
++    echo ROOTFLAGS= >> /conf/param.conf
++    echo ROOT=none >> /conf/param.conf
++    echo readonly=n >> /conf/param.conf
++fi
+
 
 fusecompress
 ------------
@@ -153,4 +168,59 @@ ls: /fusecompress: Transport endpoint is not connected
 #14 0xb7f959a9 in fuse_session_loop () from /usr/lib/libfuse.so.2
 #15 0xb7f730bd in start_thread () from /lib/tls/libpthread.so.0
 #16 0xb7dce01e in clone () from /lib/tls/libc.so.6
+
+sudo umount /fusecompress/dev
+sudo umount /fusecompress
+
+
+hostname-not-set:~# du -shx /
+77M     /
+hostname-not-set:~# du -shx --apparent-size /
+111M    /
+
+55M with gzip for every file
+46M with gzip for tar
+111M uncompressed
+
+how to do shutdown?
+how to access tmpfs?
+
+
+# ls -l /proc/840/cwd/etc/initramfs-tools /etc/initramfs-tools
+/etc/initramfs-tools:
+total 12
+drwxr-xr-x  2 root root  60 Feb 24 20:54 conf.d
+drwxr-xr-x  2 root root  60 Feb 26 18:58 hooks
+-rw-r--r--  1 root root 801 Apr 13  2007 initramfs.conf
+-rw-r--r--  1 root root 221 Feb 24 20:55 modules
+drwxr-xr-x 11 root root 220 Feb 24 20:54 scripts
+-rw-r--r--  1 root root 316 Apr  6  2007 update-initramfs.conf
+
+/proc/840/cwd/etc/initramfs-tools:
+total 12
+drwxr-xr-x  2 root root  60 Feb 24 20:54 conf.d
+drwxr-xr-x  2 root root  60 Feb 26 18:58 hooks
+-rw-r--r--  1 root root 685 Apr 13  2007 initramfs.conf
+-rw-r--r--  1 root root 288 Feb 24 20:55 modules
+drwxr-xr-x 11 root root 220 Feb 24 20:54 scripts
+-rw-r--r--  1 root root 294 Apr  6  2007 update-initramfs.conf
+
+
+# ls -l {/proc/840/cwd,}/lib/libc-2.3.6.so
+-rwxr-xr-x 1 root root 1147548 Jan 19 12:14 /lib/libc-2.3.6.so
+-rwxr-xr-x 1 root root  711596 Jan 19 12:14 /proc/840/cwd/lib/libc-2.3.6.so
+hostname-not-set:~# gzip < /lib/libc-2.3.6.so | wc -c
+536747
+hostname-not-set:~# gzip -1 < /lib/libc-2.3.6.so | wc -c
+578828
+
+with bz2 and 500k blocks:
+
+# ls -l {/proc/843/cwd,}/lib/libc-2.3.6.so
+-rwxr-xr-x 1 root root 1147548 Jan 19 12:14 /lib/libc-2.3.6.so
+-rwxr-xr-x 1 root root  501983 Jan 19 12:14 /proc/843/cwd/lib/libc-2.3.6.so
+
+
+hostname-not-set:~# du -shx /
+61M     /
 
