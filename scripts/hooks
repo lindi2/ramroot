@@ -1,0 +1,14 @@
+#!/bin/sh
+
+case $1 in
+prereqs)
+	echo ""
+	exit 0
+	;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+
+copy_exec /sbin/mke2fs /sbin
+copy_exec /sbin/tune2fs /sbin
+

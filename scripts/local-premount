@@ -24,4 +24,16 @@ if [ "$ramroot_fs" = "tmpfs" ]; then
     echo ROOT=none >> /conf/param.conf
     echo readonly=n >> /conf/param.conf
 fi
+if [ "$ramroot_fs" = "solid" ]; then
+    storage="/dev/disk/by-uuid/$ramroot_fs_uuid"
+    while [ ! -e $storage ]; do
+	sleep 2;
+    done
+    mke2fs $storage
+    tune2fs -U $ramroot_fs_uuid $storage
+    echo FSTYPE=ext2 > /conf/param.conf
+    echo ROOTFLAGS= >> /conf/param.conf
+    echo ROOT=$storage >> /conf/param.conf
+    echo readonly=n >> /conf/param.conf
+fi
 #/bin/sh

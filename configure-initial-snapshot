@@ -14,6 +14,7 @@ sudo cp scripts/modules fs/snapshot/0/etc/initramfs-tools
 sudo install scripts/local-top fs/snapshot/0/etc/initramfs-tools/scripts/local-top/ramroot
 sudo install scripts/local-premount fs/snapshot/0/etc/initramfs-tools/scripts/local-premount/ramroot
 sudo install scripts/local-bottom fs/snapshot/0/etc/initramfs-tools/scripts/local-bottom/ramroot
+sudo install scripts/hooks fs/snapshot/0/etc/initramfs-tools/hooks/ramroot
 sudo chroot fs/snapshot/0 update-initramfs -k all -c -t
 
 sudo install scripts/ramroot-{aptkludge,snapshot,update-grub,admin} fs/snapshot/0/usr/local/bin
