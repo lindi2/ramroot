@@ -41,7 +41,7 @@ if [ "$ramroot_fs" = "solid" ]; then
     while [ ! -e $storage ]; do
 	sleep 2;
     done
-    mke2fs $storage
+    mke2fs -F $storage
     tune2fs -U $ramroot_fs_uuid $storage
     echo FSTYPE=ext2 > /conf/param.conf
     echo ROOTFLAGS= >> /conf/param.conf
