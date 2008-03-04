@@ -9,6 +9,16 @@ esac
 
 . /usr/share/initramfs-tools/hook-functions
 
-copy_exec /sbin/mke2fs /sbin
-copy_exec /sbin/tune2fs /sbin
+if [ -e /usr/bin/fusecompress ]; then
+    copy_exec /usr/bin/fusecompress /sbin
+    copy_exec /usr/bin/fusermount /sbin
+    
+    manual_add_modules fuse
+fi
+
+if [ -e /sbin/mke2fs ]; then
+    copy_exec /sbin/mke2fs /sbin
+    copy_exec /sbin/tune2fs /sbin
+fi
+
 
