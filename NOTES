@@ -1,6 +1,7 @@
 todo
 ----
 
+remount,rw for mount?
 root on hda2
 dhclient should try forever
 handle multiple ethernets
