@@ -10,6 +10,7 @@ set -x
 echo > /conf/param.conf
 # defaults
 echo "export ramroot_uuid=962d307f-8f1f-4301*" >> /conf/param.conf
+echo "export ramroot_fs_uuid=ffda8257-f78a-4893*" >> /conf/param.conf
 echo "export ramroot_snapshot=0" >> /conf/param.conf
 mem="`free | grep Mem: | awk '{ print $2 }'`"
 if [ $mem -lt 180000 ]; then

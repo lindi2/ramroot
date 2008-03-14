@@ -36,16 +36,24 @@ if [ "$ramroot_fs" = "fusecompress" ]; then
     echo ROOT=none >> /conf/param.conf
     echo readonly=n >> /conf/param.conf
 fi
-if [ "$ramroot_fs" = "solid" ]; then
-    storage="/dev/disk/by-uuid/$ramroot_fs_uuid"
-    while [ ! -e $storage ]; do
-	sleep 2;
+if [ "$ramroot_fs" = "swap" ]; then
+    d="/dev/disk/by-uuid/$ramroot_fs_uuid"
+    while [ ! -e $d ]; do
+	ls -l /dev/disk/by-uuid
+	echo "waiting for ramroot_fs"
+	sleep 2
     done
-    mke2fs -F $storage
-    tune2fs -f -U $ramroot_fs_uuid $storage
+
+    if [ `/lib/udev/vol_id -t $d` != "swap" ]; then
+	echo "ramroot_fs_uuid does not point to swap!"
+	/bin/sh
+    fi
+
+    losetup -o 4096 /dev/loop7 $d
+    mke2fs /dev/loop7
     echo FSTYPE=ext2 > /conf/param.conf
     echo ROOTFLAGS= >> /conf/param.conf
-    echo ROOT=$storage >> /conf/param.conf
+    echo ROOT=/dev/loop7 >> /conf/param.conf
     echo readonly=n >> /conf/param.conf
 fi
 #/bin/sh
