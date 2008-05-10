@@ -49,6 +49,7 @@ if [ "$ramroot_fs" = "swap" ]; then
 	/bin/sh
     fi
 
+    modprobe loop
     losetup -o 4096 /dev/loop7 $d
     mke2fs /dev/loop7
     echo FSTYPE=ext2 > /conf/param.conf
