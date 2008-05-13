@@ -1,0 +1,12 @@
+Source: ramroot
+Section: unknown
+Priority: extra
+Maintainer: Timo Lindfors <lindi@kurp.hut.fi>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+
+Package: ramroot
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
