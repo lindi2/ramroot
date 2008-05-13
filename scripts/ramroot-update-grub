@@ -67,7 +67,7 @@ if [ "$ramroot_build" = "" ]; then
 fi
 mv $newlst $ramroot/boot/grub/menu.lst
 if [ "$fallback" != "" ]; then
-    grub-set-default --root-directory=$ramroot $default
+    grub-set-default --root-directory=$ramroot $default_idx
 fi
 if [ "$ramroot_build" = "" ]; then
     mount -o remount,ro $ramroot
