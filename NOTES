@@ -1,6 +1,10 @@
 todo
 ----
 
+give visual indication that watchdog is running
+tell user how he can deactivate watchdog
+write --help for ramroot-*
+provide ramroot-diff?
 make sure no hardware watchdog is present or make them understand longer timeout
 remount,rw for mount?
 root on hda2
