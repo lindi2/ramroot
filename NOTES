@@ -1,6 +1,7 @@
 todo
 ----
 
+make sure no hardware watchdog is present or make them understand longer timeout
 remount,rw for mount?
 root on hda2
 dhclient should try forever
