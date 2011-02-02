@@ -5,7 +5,7 @@ mount -o ro -U "${boot_uuid}" $ramroot
 if [ "$1" = "" ]; then
     echo "Mounted ramroot read-only at $ramroot (\$ramroot)"
     echo "Spawning shell with 10-minute timeout for umount"
-    TMOUT=600 /bin/sh
+    TMOUT=600 /bin/bash
 else
     "$@"
 fi
