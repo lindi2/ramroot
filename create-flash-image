@@ -50,7 +50,7 @@ else
 fi    
 sudo umount mnt
 
-grub <<EOF
+/usr/sbin/grub <<EOF
 device (hd0) img
 geometry (hd0) 61 255 63
 root (hd0,0)
