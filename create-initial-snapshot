@@ -18,7 +18,7 @@ sudo chroot fs/snapshot/0 apt-get -y remove $remove
 sudo chroot fs/snapshot/0 dpkg -P $remove
 add="debconf-english libedit2 libkrb53 openssh-client openssh-server"
 add+=" grub ifupdown dhcp3-client"
-if [ "`uname -m`" = "amd64" ]; then
+if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then
     add+=" linux-image-2.6-amd64"
 else
     add+=" linux-image-2.6-486"
