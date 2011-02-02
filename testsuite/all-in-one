@@ -59,8 +59,13 @@ done
 # test that we can install a new kernel
 $run ramroot-aptkludge start
 $run apt-get update
-$run apt-get -y --force-yes install linux-image-2.6-686
-$run grep 686 /boot/grub/menu.lst
+if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then
+    $run apt-get -y --force-yes install linux-image-2.6-vserver-amd64
+    $run grep vserver-amd64 /boot/grub/menu.lst
+else
+    $run apt-get -y --force-yes install linux-image-2.6-686
+    $run grep 686 /boot/grub/menu.lst
+fi
 
 # reboot to the new kernel
 $run "echo phase3 > /etc/hostname"
@@ -70,7 +75,11 @@ $run shutdown -r now
 while [ "`$run hostname`" != "phase3" ]; do
     sleep 10;
 done
-[ "`$run uname -r | grep 686`" != "" ]
+if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then
+    [ "`$run uname -r | grep vserver-amd64`" != "" ]
+else
+    [ "`$run uname -r | grep 686`" != "" ]
+fi
 
 rm $known_hosts
 echo OK
