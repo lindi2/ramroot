@@ -9,6 +9,10 @@ mkdir mnt
 # 480*1024*1024/(512*63*255) = 61.2
 dd if=/dev/zero of=img bs=1M count=0 seek=480
 set +e
+if [ "$(/sbin/fdisk -v | grep -i "^gnu fdisk")" != "" ]; then
+    echo "Sorry, gnu-fdisk is not supported due to bug #611011"
+    exit 1
+fi
 /sbin/fdisk -C 61 -H 255 -S 63 img <<EOF
 n
 p
