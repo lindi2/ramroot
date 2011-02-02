@@ -57,6 +57,8 @@ while [ "`$run hostname`" != "phase1" ]; do
 done
 
 # test that we can install a new kernel
+$run ramroot-aptkludge start || true
+sleep 10
 $run ramroot-aptkludge start
 $run apt-get update
 if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then

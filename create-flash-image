@@ -35,10 +35,11 @@ sudo losetup -o 32256 "${loopdev}" img
 sudo mkfs -t ext2 -b 4096 "${loopdev}" 120487
 ramroot_uuid="`uuidgen | sed 's@^........-....-....@962d307f-8f1f-4301@'`"
 sudo tune2fs -U $ramroot_uuid "${loopdev}"
+sync
 sudo losetup -d "${loopdev}"
 
 sudo mkdir -p fs/snapshot/0/boot/grub
-echo y | sudo chroot fs/snapshot/0 update-grub
+sudo cp menu.lst fs/snapshot/0/boot/grub
 
 sudo mount img mnt -oloop,offset=32256
 sudo cp -a fs/snapshot mnt
