@@ -19,7 +19,7 @@ iface="`sudo tunctl -b -u $userid`"
 args="-hda $img -boot c"
 args+=" -net nic,vlan=9,macaddr=52:54:00:12:36:03"
 args+=" -net tap,vlan=9,ifname=$iface,script=/etc/qemu-ifup"
-args+=" -m 256 -vnc :49 -monitor stdio"
+args+=" -m 512 -vnc :49 -monitor stdio"
 args+=" -S"
 qemu $args "$@"
 cleanup
