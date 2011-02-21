@@ -22,21 +22,24 @@ $run apt-get -y --force-yes install rsync psmisc
 $run "echo phase1 > /etc/hostname"
 $run ramroot-admin ramroot-snapshot 0 1 phase1
 $run ramroot-admin ramroot-update-grub 1
-$run shutdown -r now
+echo b | $run dd of=/proc/sysrq-trigger &
+sleep 10
 while [ "`$run hostname`" != "phase1" ]; do
     sleep 10;
 done
 
 # boot back to initial snapshot
 $run ramroot-admin ramroot-update-grub 0
-$run shutdown -r now
+echo b | $run dd of=/proc/sysrq-trigger &
+sleep 10
 while [ "`$run hostname`" != "hostname-not-set" ]; do
     sleep 10;
 done
 
 # boot again to snapshot 1
 $run ramroot-admin ramroot-update-grub 1
-$run shutdown -r now
+echo b | $run dd of=/proc/sysrq-trigger &
+sleep 10
 while [ "`$run hostname`" != "phase1" ]; do
     sleep 10;
 done
@@ -45,7 +48,8 @@ done
 $run "echo phase2 > /etc/hostname"
 $run ramroot-admin ramroot-snapshot 1 2 "phase2"
 $run ramroot-admin ramroot-update-grub 2 1 300
-$run shutdown -r now
+echo b | $run dd of=/proc/sysrq-trigger &
+sleep 10
 while [ "`$run hostname`" != "phase2" ]; do
     sleep 10;
 done
@@ -73,7 +77,8 @@ fi
 $run "echo phase3 > /etc/hostname"
 $run ramroot-admin ramroot-snapshot 2 3 "phase3"
 $run ramroot-admin ramroot-update-grub 3
-$run shutdown -r now
+echo b | $run dd of=/proc/sysrq-trigger &
+sleep 10
 while [ "`$run hostname`" != "phase3" ]; do
     sleep 10;
 done
