@@ -9,6 +9,7 @@ sudo mkdir -p fs/snapshot/0/etc/ramroot
 echo "#0 `date +"%Y-%m-%d %H:%M"` initial snapshot" | sudo tee fs/snapshot/0/etc/ramroot/grub-title
 sudo mkdir -p fs/snapshot/0/root/.ssh
 sudo cp ~/.ssh/id_dsa.pub fs/snapshot/0/root/.ssh/authorized_keys
+echo "retry 3600;" | sudo tee -a fs/snapshot/0/etc/dhclient.conf
 
 sudo cp scripts/modules fs/snapshot/0/etc/initramfs-tools
 sudo install scripts/local-top fs/snapshot/0/etc/initramfs-tools/scripts/local-top/ramroot
