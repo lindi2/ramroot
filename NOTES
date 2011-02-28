@@ -1,6 +1,7 @@
 todo
 ----
 
+fdisk: use c, u?
 give visual indication that watchdog is running
 tell user how he can deactivate watchdog
 write --help for ramroot-*
