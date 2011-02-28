@@ -9,11 +9,11 @@ if [ "$debian_mirror" = "" ]; then
     debian_mirror="http://ftp.debian.org/debian"
 fi
 sudo debootstrap squeeze fs/snapshot/0 $debian_mirror
-remove="apt-utils aptitude bsdmainutils cpio cron dmidecode ed groff-base info iptables"
-remove+=" libgdbm3 liblocale-gettext-perl libncursesw5"
-remove+=" libnewt0.52 libpopt0 libtext-charwidth-perl libtext-iconv-perl libtext-wrapi18n-perl"
-remove+=" logrotate man-db manpages nano procps tasksel tasksel-data traceroute"
-remove+=" vim-common vim-tiny wget whiptail"
+remove="apt-utils aptitude bsdmainutils cron groff-base info iptables"
+remove+=" libgdbm3 libncursesw5"
+remove+=" libnewt0.52 libpopt0"
+remove+=" logrotate man-db nano procps tasksel"
+remove+=" vim-common vim-tiny wget"
 sudo chroot fs/snapshot/0 apt-get -y --force-yes remove $remove
 sudo chroot fs/snapshot/0 dpkg -P $remove
 add="debconf-english libedit2 libkrb53 openssh-client openssh-server"
