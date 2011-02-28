@@ -38,26 +38,14 @@ sudo tune2fs -U $ramroot_uuid "${loopdev}"
 sync
 sudo losetup -d "${loopdev}"
 
-sudo mkdir -p fs/snapshot/0/boot/grub
-sudo cp menu.lst fs/snapshot/0/boot/grub
-
+img_loop=$(sudo losetup -f --show img)
 sudo mount img mnt -oloop,offset=32256
 sudo cp -a fs/snapshot mnt
 sudo mkdir -p mnt/boot/grub
-if [ -d fs/snapshot/0/usr/lib/grub/i386-pc ]; then
-    sudo cp fs/snapshot/0/usr/lib/grub/i386-pc/{stage1,e2fs_stage1_5,stage2} mnt/boot/grub
-else
-    sudo cp fs/snapshot/0/usr/lib/grub/x86_64-pc/{stage1,e2fs_stage1_5,stage2} mnt/boot/grub
-fi    
+sudo touch mnt/boot/grub/device.map
+sudo grub-install --modules "part_msdos biosdisk ext2 search_fs_uuid" --root-directory $(pwd)/mnt --no-floppy $img_loop
 sudo umount mnt
-
-/usr/sbin/grub <<EOF
-device (hd0) img
-geometry (hd0) 61 255 63
-root (hd0,0)
-setup (hd0)
-quit
-EOF
+sudo losetup -d $img_loop
 
 sudo mount img mnt -oloop,offset=32256
 sudo sh -c "ramroot_build=1 ramroot=mnt boot_uuid=$ramroot_uuid mnt/snapshot/0/usr/local/bin/ramroot-update-grub 0"
