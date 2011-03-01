@@ -18,7 +18,7 @@ if [ -d "$ramroot/snapshot/$new" ]; then
     exit 1
 fi
 
-echo "#${new} `date +"%Y-%m-%d %H:%M"` ${desc}" > /etc/ramroot/grub-title
+echo "#${new} `date -u +"%Y-%m-%d %H:%M"` ${desc}" > /etc/ramroot/grub-title
 
 mount -o remount,rw $ramroot
 rsync --numeric-ids -ax --delete --link-dest=../${prev} --exclude $ramroot / $ramroot/snapshot/${new}
