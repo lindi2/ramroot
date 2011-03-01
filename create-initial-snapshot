@@ -25,3 +25,4 @@ else
 fi
 sudo chroot fs/snapshot/0 apt-get --force-yes -y install $add
 echo "PasswordAuthentication no" | sudo tee -a fs/snapshot/0/etc/ssh/sshd_config
+echo -e "ramroot\nramroot" | sudo chroot fs/snapshot/0 passwd
