@@ -17,7 +17,7 @@ remove+=" vim-common vim-tiny wget"
 sudo chroot fs/snapshot/0 apt-get -y --force-yes remove $remove
 sudo chroot fs/snapshot/0 dpkg -P $remove
 add="debconf-english libedit2 libkrb53 openssh-client openssh-server"
-add+=" ifupdown dhcp3-client"
+add+=" ifupdown dhcp3-client grub-common"
 if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then
     add+=" linux-image-2.6-amd64"
 else

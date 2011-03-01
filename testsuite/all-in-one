@@ -67,10 +67,10 @@ $run ramroot-aptkludge start
 $run apt-get update
 if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then
     $run apt-get -y --force-yes install linux-image-2.6-vserver-amd64
-    $run grep vserver-amd64 /boot/grub/menu.lst
+    $run readlink /vmlinuz | grep vserver-amd64
 else
     $run apt-get -y --force-yes install linux-image-2.6-686
-    $run grep 686 /boot/grub/menu.lst
+    $run readlink /vmlinuz | grep 686
 fi
 
 # reboot to the new kernel

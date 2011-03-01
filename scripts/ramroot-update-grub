@@ -27,31 +27,40 @@ for i in `cd $ramroot/snapshot && echo *`; do
 	fallback_idx=$idx
     fi
     title="`cat $ramroot/snapshot/$i/etc/ramroot/grub-title`"
-    echo "title $title" >> $entries
     extraopts=" ramroot_uuid=$boot_uuid ramroot_snapshot=$i panic=60"
     if [ "$fallback" != "" -a "$i" = "$default" ]; then
 	extraopts+=" ramroot_watchdog=$fallback_timeout"
     fi
-    grep -E "^(kernel|initrd)" $ramroot/snapshot/$i/boot/grub/menu.lst\
-    | head -n 2\
-    | sed "s@^@ @;s@/boot/@/snapshot/$i/boot/@;s@ root=/dev/hda1 ro @ @"\
-    | sed "/^ kernel/s@\$@$extraopts@"\
-    >> $entries
+    cat >> $entries <<EOF
+menuentry '$title' --class debian --class gnu-linux --class gnu --class os {
+EOF
     if [ "$fallback" != "" -a "$i" = "$default" ]; then
-	echo " savedefault fallback" >> $entries
+	echo " set savedefault=$fallback_idx" >> $entries
+	echo " save_env savedefault" >> $entries
     fi
+    cat >> $entries <<EOF
+ insmod part_msdos
+ insmod ext2
+ set root='(hd0,msdos1)'
+ search --no-floppy --fs-uuid --set $boot_uuid
+ echo 'Loading $title'
+ linux /snapshot/$i/vmlinuz $extraopts
+ echo 'Loading initial ramdisk ...'
+ initrd /snapshot/$i/initrd.img
+}
+EOF
     echo >> $entries
     idx="`expr $idx + 1`"
 done
 
 newlst=`mktemp`
-echo "timeout 10" >> $newlst
-echo "root (hd0,0)" >> $newlst
+echo "set timeout=10" >> $newlst
+echo "set root='(hd0,msdos1)'" >> $newlst
 if [ "$fallback" != "" ]; then
-    echo "default saved" >> $newlst
-    echo "fallback $fallback_idx" >> $newlst
+    echo "load_env" >> $newlst
+    echo "set default=\${savedefault}" >> $newlst
 else
-    echo "default $default_idx" >> $newlst
+    echo "set default=\"$default_idx\"" >> $newlst
 fi
 echo >> $newlst
 cat $entries >> $newlst
@@ -65,9 +74,11 @@ fi
 if [ "$ramroot_build" = "" ]; then
     mount -o remount,rw $ramroot
 fi
-mv $newlst $ramroot/boot/grub/menu.lst
+mv $newlst $ramroot/boot/grub/grub.cfg
 if [ "$fallback" != "" ]; then
-    grub-set-default --root-directory=$ramroot $default_idx
+    grub-editenv $ramroot/boot/grub/grubenv set savedefault=$default_idx
+else
+    grub-editenv $ramroot/boot/grub/grubenv unset savedefault
 fi
 if [ "$ramroot_build" = "" ]; then
     mount -o remount,ro $ramroot
