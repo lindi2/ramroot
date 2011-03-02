@@ -1,4 +1,14 @@
 #!/bin/bash
+build_grubenv() {
+    (
+	echo "# GRUB Environment Block"
+	cat
+	for i in $(seq 1 1024); do
+	    echo -n "#"
+	done
+    ) | dd bs=1 count=1024 2> /dev/null
+}
+
 if [ "$ramroot" = "" ]; then
     echo "Use only with ramroot-admin"
     exit 1
@@ -76,9 +86,9 @@ if [ "$ramroot_build" = "" ]; then
 fi
 mv $newlst $ramroot/boot/grub/grub.cfg
 if [ "$fallback" != "" ]; then
-    grub-editenv $ramroot/boot/grub/grubenv set savedefault=$default_idx
+    echo "savedefault=$default_idx" | build_grubenv > $ramroot/boot/grub/grubenv
 else
-    grub-editenv $ramroot/boot/grub/grubenv unset savedefault
+    echo -n "" | build_grubenv > $ramroot/boot/grub/grubenv
 fi
 if [ "$ramroot_build" = "" ]; then
     mount -o remount,ro $ramroot
