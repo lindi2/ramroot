@@ -1,6 +1,7 @@
 todo
 ----
 
+use kpartx instead of losetup
 fdisk: use c, u?
 give visual indication that watchdog is running
 tell user how he can deactivate watchdog
