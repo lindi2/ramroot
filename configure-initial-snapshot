@@ -10,6 +10,7 @@ echo "#0 `date -u +"%Y-%m-%d %H:%M"` initial snapshot" | sudo tee fs/snapshot/0/
 sudo mkdir -p fs/snapshot/0/root/.ssh
 sudo cp ~/.ssh/id_dsa.pub fs/snapshot/0/root/.ssh/authorized_keys
 echo "retry 3600;" | sudo tee -a fs/snapshot/0/etc/dhclient.conf
+echo "timeout 120;" | sudo tee -a fs/snapshot/0/etc/dhcp/dhclient.conf
 echo "PasswordAuthentication no" | sudo tee -a fs/snapshot/0/etc/ssh/sshd_config
 echo -e "ramroot\nramroot" | sudo chroot fs/snapshot/0 passwd
 
