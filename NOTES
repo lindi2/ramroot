@@ -1,6 +1,8 @@
 todo
 ----
 
+packages that are nice but not stricly necessary:
+ busybox bash iputils-ping manpages netcat-traditional traceroute
 use kpartx instead of losetup
 fdisk: use c, u?
 give visual indication that watchdog is running
