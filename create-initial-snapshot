@@ -23,4 +23,4 @@ if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then
 else
     add+=" linux-image-2.6-486"
 fi
-sudo chroot fs/snapshot/0 apt-get --force-yes -y install $add
+sudo chroot fs/snapshot/0 apt-get --no-install-recommends --force-yes -y install $add
