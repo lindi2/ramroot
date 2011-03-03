@@ -9,7 +9,7 @@ echo "ramroot: local-bottom"
 set -x
 mkdir /fs
 modprobe ext2 # for amd64 (x86 has CONFIG_EXT2_FS=y)
-while ! mount -n -oro /dev/disk/by-uuid/${ramroot_uuid} /fs; do
+while ! mount -t ext2 -n -oro /dev/disk/by-uuid/${ramroot_uuid} /fs; do
     ls -l /dev/disk/by-uuid
     echo "== Waiting for ${ramroot_uuid}"
     sleep 2
