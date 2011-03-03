@@ -13,7 +13,7 @@ remove="apt-utils aptitude bsdmainutils cron groff-base info iptables"
 remove+=" libgdbm3 libncursesw5"
 remove+=" libnewt0.52 libpopt0"
 remove+=" logrotate man-db nano procps tasksel"
-remove+=" vim-common vim-tiny wget"
+remove+=" vim-common vim-tiny wget libxapian22"
 sudo chroot fs/snapshot/0 apt-get -y --force-yes remove $remove
 sudo chroot fs/snapshot/0 dpkg -P $remove
 add="debconf-english libedit2 libkrb53 openssh-client openssh-server"
