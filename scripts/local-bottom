@@ -14,9 +14,15 @@ while ! mount -t ext2 -n -oro /dev/disk/by-uuid/${ramroot_uuid} /fs; do
     echo "== Waiting for ${ramroot_uuid}"
     sleep 2
 done
-for i in /fs/snapshot/${ramroot_snapshot}/*; do
-    cp -a $i ${rootmnt}
-done
+(
+    while [ -d /fs ]; do
+        busybox df -h ${rootmnt}
+        sleep 3
+    done
+) &
+
+(cd /fs/snapshot/${ramroot_snapshot} && cp -a . ${rootmnt})
+
 boot_uuid="`(cd /dev/disk/by-uuid; echo $ramroot_uuid)`"
 echo "boot_uuid=${boot_uuid}" > ${rootmnt}/etc/ramroot/boot-info
 echo "boot_snapshot=${ramroot_snapshot}" >> ${rootmnt}/etc/ramroot/boot-info
