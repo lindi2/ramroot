@@ -38,6 +38,7 @@ for i in `cd $ramroot/snapshot && echo *`; do
     fi
     title="`cat $ramroot/snapshot/$i/etc/ramroot/grub-title`"
     extraopts=" ramroot_uuid=$boot_uuid ramroot_snapshot=$i panic=60"
+    extraopts+=" `cat $ramroot/snapshot/$i/etc/ramroot/grub-extraopts`"
     if [ "$fallback" != "" -a "$i" = "$default" ]; then
 	extraopts+=" ramroot_watchdog=$fallback_timeout"
     fi
