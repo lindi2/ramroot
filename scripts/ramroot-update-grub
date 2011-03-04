@@ -57,6 +57,7 @@ EOF
  linux /snapshot/$i/vmlinuz $extraopts
  echo 'Loading initial ramdisk ...'
  initrd /snapshot/$i/initrd.img
+ echo 'Now booting the kernel ...'
 }
 EOF
     echo >> $entries
