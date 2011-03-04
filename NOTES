@@ -1,6 +1,7 @@
 todo
 ----
 
+put git commit id to image
 packages that are nice but not stricly necessary:
  busybox bash iputils-ping manpages netcat-traditional traceroute
 use kpartx instead of losetup
