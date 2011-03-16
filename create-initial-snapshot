@@ -3,6 +3,13 @@ set -e
 set -x
 export LC_ALL=C
 
+version=$(git log --pretty=oneline -1 | cut -d' ' -f1)
+modified=""
+if [ "$(git diff)" != "" ]; then
+    echo "Warning: uncommited local changes are present!" 1>&2
+    sleep 2
+    modified="(local changes!)"
+fi
 if [ -d fs ]; then sudo rm -fr fs; fi
 sudo mkdir -p fs/snapshot/0
 if [ "$debian_mirror" = "" ]; then
@@ -27,3 +34,7 @@ else
     add+=" linux-image-2.6-486"
 fi
 sudo chroot fs/snapshot/0 apt-get --no-install-recommends --force-yes -y install $add
+sudo mkdir -p fs/snapshot/0/etc/ramroot
+echo "$version $modified" | sudo tee fs/snapshot/0/etc/ramroot/origin
+git log -10 -p | sudo tee fs/snapshot/0/etc/ramroot/gitlog
+sudo bzip2 -9 fs/snapshot/0/etc/ramroot/gitlog
