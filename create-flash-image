@@ -3,22 +3,25 @@ set -e
 set -x
 export LC_ALL=C
 
+image_size=480 # MB
+part_begin=1 # MB
+part_size=477 # MB
+
 if [ -e img ]; then rm -f img; fi
 if [ -d mnt ]; then rmdir mnt; fi
 mkdir mnt
-# 480*1024*1024/(512*63*255) = 61.2
-dd if=/dev/zero of=img bs=1M count=0 seek=480
+dd if=/dev/zero of=img bs=1M count=0 seek=$image_size
 set +e
 if [ "$(/sbin/fdisk -v | grep -i "^gnu fdisk")" != "" ]; then
     echo "Sorry, gnu-fdisk is not supported due to bug #611011"
     exit 1
 fi
-/sbin/fdisk -C 61 -H 255 -S 63 img <<EOF
+/sbin/fdisk -C 61 -H 255 -S 63 -c -u img <<EOF
 n
 p
 1
-1
-61
+$(expr $part_begin \* 1024 \* 1024 / 512)
+$(expr $part_size \* 1024 \* 1024 / 512)
 a
 1
 w
@@ -30,16 +33,15 @@ if [ ! -e /dev/loop0 ]; then
     sudo modprobe loop
 fi
 loopdev="`sudo losetup -f`"
-sudo losetup -o 32256 "${loopdev}" img
-# (61-1)*255*63*512/4096 = 120487
-sudo mkfs -t ext2 -b 4096 "${loopdev}" 120487
+sudo losetup -o $(expr $part_begin \* 1024 \* 1024) --sizelimit $(expr $part_size \* 1024 \* 1024) "${loopdev}" img
+sudo mkfs -t ext2 -b 4096 "${loopdev}"
 ramroot_uuid="`uuidgen | sed 's@^........-....-....@962d307f-8f1f-4301@'`"
 sudo tune2fs -U $ramroot_uuid "${loopdev}"
 sync
 sudo losetup -d "${loopdev}"
 
 img_loop=$(sudo losetup -f --show img)
-sudo mount img mnt -oloop,offset=32256
+sudo mount img mnt -oloop,offset=$(expr $part_begin \* 1024 \* 1024)
 sudo cp -a fs/snapshot mnt
 sudo mkdir -p mnt/boot/grub
 sudo touch mnt/boot/grub/device.map
@@ -47,7 +49,7 @@ sudo grub-install --modules "part_msdos biosdisk ext2 search_fs_uuid" --root-dir
 sudo umount mnt
 sudo losetup -d $img_loop
 
-sudo mount img mnt -oloop,offset=32256
+sudo mount img mnt -oloop,offset=$(expr $part_begin \* 1024 \* 1024)
 sudo sh -c "ramroot_build=1 ramroot=mnt boot_uuid=$ramroot_uuid mnt/snapshot/0/usr/local/bin/ramroot-update-grub 0"
 sudo umount mnt
 rmdir mnt
