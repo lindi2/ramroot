@@ -3,22 +3,25 @@ set -e
 set -x
 export LC_ALL=C
 
-echo hostname-not-set | sudo tee fs/snapshot/0/etc/hostname
-echo -e "auto lo\niface lo inet loopback\n\nauto eth0\niface eth0 inet dhcp" | sudo tee fs/snapshot/0/etc/network/interfaces
-echo "#0 `date -u +"%Y-%m-%d %H:%M"` initial snapshot" | sudo tee fs/snapshot/0/etc/ramroot/grub-title
-sudo touch fs/snapshot/0/etc/ramroot/grub-extraopts
-sudo mkdir -p fs/snapshot/0/root/.ssh
-sudo cp ~/.ssh/id_dsa.pub fs/snapshot/0/root/.ssh/authorized_keys
-echo "retry 3600;" | sudo tee -a fs/snapshot/0/etc/dhclient.conf
-echo "timeout 120;" | sudo tee -a fs/snapshot/0/etc/dhcp/dhclient.conf
-echo "PasswordAuthentication no" | sudo tee -a fs/snapshot/0/etc/ssh/sshd_config
-echo -e "ramroot\nramroot" | sudo chroot fs/snapshot/0 passwd
+if [ "$build_dir" = "" ]; then
+    build_dir="."
+fi
+echo hostname-not-set | sudo tee $build_dir/fs/snapshot/0/etc/hostname
+echo -e "auto lo\niface lo inet loopback\n\nauto eth0\niface eth0 inet dhcp" | sudo tee $build_dir/fs/snapshot/0/etc/network/interfaces
+echo "#0 `date -u +"%Y-%m-%d %H:%M"` initial snapshot" | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/grub-title
+sudo touch $build_dir/fs/snapshot/0/etc/ramroot/grub-extraopts
+sudo mkdir -p $build_dir/fs/snapshot/0/root/.ssh
+sudo cp ~/.ssh/id_rsa.pub $build_dir/fs/snapshot/0/root/.ssh/authorized_keys
+echo "retry 3600;" | sudo tee -a $build_dir/fs/snapshot/0/etc/dhcp/dhclient.conf
+echo "timeout 120;" | sudo tee -a $build_dir/fs/snapshot/0/etc/dhcp/dhclient.conf
+echo "PasswordAuthentication no" | sudo tee -a $build_dir/fs/snapshot/0/etc/ssh/sshd_config
+echo -e "ramroot\nramroot" | sudo chroot $build_dir/fs/snapshot/0 passwd
 
-sudo cp scripts/modules fs/snapshot/0/etc/initramfs-tools
-sudo install scripts/local-top fs/snapshot/0/etc/initramfs-tools/scripts/local-top/ramroot
-sudo install scripts/local-premount fs/snapshot/0/etc/initramfs-tools/scripts/local-premount/ramroot
-sudo install scripts/local-bottom fs/snapshot/0/etc/initramfs-tools/scripts/local-bottom/ramroot
-sudo install scripts/hooks fs/snapshot/0/etc/initramfs-tools/hooks/ramroot
-sudo chroot fs/snapshot/0 update-initramfs -k all -c -t
+sudo cp scripts/modules $build_dir/fs/snapshot/0/etc/initramfs-tools
+sudo install scripts/local-top $build_dir/fs/snapshot/0/etc/initramfs-tools/scripts/local-top/ramroot
+sudo install scripts/local-premount $build_dir/fs/snapshot/0/etc/initramfs-tools/scripts/local-premount/ramroot
+sudo install scripts/hooks $build_dir/fs/snapshot/0/etc/initramfs-tools/hooks/ramroot
+sudo chroot $build_dir/fs/snapshot/0 update-initramfs -k all -c -t
+sudo chroot $build_dir/fs/snapshot/0 ln -sf $(sudo chroot $build_dir/fs/snapshot/0 readlink initrd.img | sed 's@^/@@') initrd.img
 
-sudo install scripts/ramroot-{aptkludge,snapshot,update-grub,admin} fs/snapshot/0/usr/local/bin
+sudo install scripts/ramroot-{aptkludge,snapshot,update-grub,admin} $build_dir/fs/snapshot/0/usr/local/bin

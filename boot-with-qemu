@@ -3,23 +3,13 @@ set -e
 set -x
 export LC_ALL=C
 
-# http://iki.fi/lindi/qemu-network.txt
-iface=""
-function cleanup() {
-    sudo tunctl -d $iface
-    exit 0
-}
-trap cleanup 1 2 3 15
+if [ "$build_dir" = "" ]; then
+    build_dir="."
+fi
 img="$1"
 if [ "$img" = "" ]; then
-    img="img"
+    img="$build_dir/img"
 fi
-userid="`whoami`"
-iface="`sudo tunctl -b -u $userid`"
-args="-hda $img -boot c"
-args+=" -net nic,vlan=9,macaddr=52:54:00:12:36:03"
-args+=" -net tap,vlan=9,ifname=$iface,script=/etc/qemu-ifup"
-args+=" -m 512 -vnc :49 -monitor stdio"
-args+=" -S"
-qemu-system-$(uname -m) $args "$@"
-cleanup
+
+qemu-system-$(uname -m) -hda $img -boot c -m 1024 -curses -net user,hostfwd=tcp::8022-:22 -net nic,model=e1000,macaddr=52:54:00:12:36:03
+

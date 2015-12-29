@@ -10,31 +10,33 @@ if [ "$(git diff)" != "" ]; then
     sleep 2
     modified="(local changes!)"
 fi
-if [ -d fs ]; then sudo rm -fr fs; fi
-sudo mkdir -p fs/snapshot/0
+if [ "$build_dir" = "" ]; then
+    build_dir="."
+fi
+if [ -d $build_dir/fs ]; then sudo rm -fr $build_dir/fs; fi
+sudo mkdir -p $build_dir/fs/snapshot/0
 if [ "$debian_mirror" = "" ]; then
     debian_mirror="http://ftp.debian.org/debian"
 fi
-sudo debootstrap squeeze fs/snapshot/0 $debian_mirror
-remove="apt-utils aptitude bsdmainutils cron groff-base info iptables"
-remove+=" libgdbm3 libncursesw5"
+sudo debootstrap jessie $build_dir/fs/snapshot/0 $debian_mirror
+remove="apt-utils bsdmainutils groff-base iptables"
+remove+=" libgdbm3"
 remove+=" libnewt0.52 libpopt0"
-remove+=" logrotate man-db nano procps tasksel"
-remove+=" vim-common vim-tiny wget libxapian22"
-remove+=" libsqlite3-0 libtext-charwidth-perl libtext-iconv-perl"
-remove+=" libboost-iostreams1.42.0 libkrb53 liblocale-gettext-perl"
-remove+=" libnfnetlink0 libsigc++-2.0-0c2a dmidecode"
-sudo chroot fs/snapshot/0 apt-get -y --force-yes remove $remove
-sudo chroot fs/snapshot/0 dpkg -P $remove
-add="debconf-english libedit2 libkrb53 openssh-client openssh-server"
-add+=" ifupdown dhcp3-client busybox"
-if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then
-    add+=" linux-image-2.6-amd64"
+remove+=" logrotate man-db nano tasksel"
+remove+=" vim-common vim-tiny wget"
+remove+=" libboost-iostreams1.55.0 "
+remove+=" libnfnetlink0 libsigc++-2.0-0c2a"
+sudo chroot $build_dir/fs/snapshot/0 apt-get -y --force-yes remove $remove
+sudo chroot $build_dir/fs/snapshot/0 dpkg -P $remove
+add="openssh-server"
+add+=" busybox systemd-sysv"
+if [ "$(dpkg-architecture -qDEB_BUILD_ARCH)" = "amd64" ]; then
+    add+=" linux-image-amd64"
 else
-    add+=" linux-image-2.6-486"
+    add+=" linux-image-686"
 fi
-sudo chroot fs/snapshot/0 apt-get --no-install-recommends --force-yes -y install $add
-sudo mkdir -p fs/snapshot/0/etc/ramroot
-echo "$version $modified" | sudo tee fs/snapshot/0/etc/ramroot/origin
-git log -10 -p | sudo tee fs/snapshot/0/etc/ramroot/gitlog
-sudo bzip2 -9 fs/snapshot/0/etc/ramroot/gitlog
+sudo chroot $build_dir/fs/snapshot/0 apt-get --no-install-recommends --force-yes -y install $add
+sudo mkdir -p $build_dir/fs/snapshot/0/etc/ramroot
+echo "$version $modified" | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/origin 2> /dev/null
+git log -10 -p | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/gitlog 2> /dev/null
+sudo bzip2 -9 $build_dir/fs/snapshot/0/etc/ramroot/gitlog

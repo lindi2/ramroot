@@ -3,12 +3,15 @@ set -e
 set -x
 export LC_ALL=C
 
-sudo chroot fs/snapshot/0 apt-get clean
-sudo rm fs/snapshot/0/var/lib/apt/lists/*Packages
-sudo rm -fr fs/snapshot/0/var/cache/apt
-sudo mkdir fs/snapshot/0/var/cache/apt
-sudo rm -fr fs/snapshot/0/usr/share/locale
-sudo mkdir fs/snapshot/0/usr/share/locale
-sudo rm -fr fs/snapshot/0/usr/share/doc
-sudo mkdir fs/snapshot/0/usr/share/doc
-sudo rm -fr fs/snapshot/0/lib/modules/2.6*/kernel/{sound,drivers/media,drivers/isdn,drivers/video}
+if [ "$build_dir" = "" ]; then
+    build_dir="."
+fi
+sudo chroot $build_dir/fs/snapshot/0 apt-get clean
+sudo rm $build_dir/fs/snapshot/0/var/lib/apt/lists/*Packages
+sudo rm -fr $build_dir/fs/snapshot/0/var/cache/apt
+sudo mkdir $build_dir/fs/snapshot/0/var/cache/apt
+sudo rm -fr $build_dir/fs/snapshot/0/usr/share/locale
+sudo mkdir $build_dir/fs/snapshot/0/usr/share/locale
+sudo rm -fr $build_dir/fs/snapshot/0/usr/share/doc
+sudo mkdir $build_dir/fs/snapshot/0/usr/share/doc
+sudo rm -fr $build_dir/fs/snapshot/0/lib/modules/3.*/kernel/{sound,drivers/media,drivers/isdn,drivers/video}

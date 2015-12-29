@@ -1,6 +1,6 @@
 #!/bin/sh
 . /etc/ramroot/boot-info
-export ramroot="`mktemp -d`"
+export ramroot="$(mktemp -d)"
 mount -o ro -U "${boot_uuid}" $ramroot
 if [ "$1" = "" ]; then
     echo "Mounted ramroot read-only at $ramroot (\$ramroot)"

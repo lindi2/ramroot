@@ -3,17 +3,18 @@ set -e
 set -x
 export LC_ALL=C
 target="$1"
-known_hosts="`mktemp`"
-run="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$known_hosts -l root $target"
+port="$2"
+known_hosts="$(mktemp)"
+run="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=$known_hosts -l root -p $port $target"
 
 # check that we are talking to a real ramroot system
-while [ "`$run hostname`" != "hostname-not-set" ]; do
+while [ "$($run hostname)" != "hostname-not-set" ]; do
     sleep 10;
 done
 $run [ -d /etc/ramroot ]
 
 # check filesystem
-[ "`$run '. /etc/ramroot/boot-info; fsck -n /dev/disk/by-uuid/$boot_uuid'|grep ": clean,"`" != "" ]
+[ "$($run '. /etc/ramroot/boot-info; fsck -n /dev/disk/by-uuid/$boot_uuid'|grep ": clean,")" != "" ]
 
 # create a snapshot and boot to it
 $run ramroot-aptkludge start
@@ -24,7 +25,7 @@ $run ramroot-admin ramroot-snapshot 0 1 phase1
 $run ramroot-admin ramroot-update-grub 1
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
-while [ "`$run hostname`" != "phase1" ]; do
+while [ "$($run hostname)" != "phase1" ]; do
     sleep 10;
 done
 
@@ -32,7 +33,7 @@ done
 $run ramroot-admin ramroot-update-grub 0
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
-while [ "`$run hostname`" != "hostname-not-set" ]; do
+while [ "$($run hostname)" != "hostname-not-set" ]; do
     sleep 10;
 done
 
@@ -40,7 +41,7 @@ done
 $run ramroot-admin ramroot-update-grub 1
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
-while [ "`$run hostname`" != "phase1" ]; do
+while [ "$($run hostname)" != "phase1" ]; do
     sleep 10;
 done
 
@@ -50,43 +51,12 @@ $run ramroot-admin ramroot-snapshot 1 2 "phase2"
 $run ramroot-admin ramroot-update-grub 2 1 300
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
-while [ "`$run hostname`" != "phase2" ]; do
+while [ "$($run hostname)" != "phase2" ]; do
     sleep 10;
 done
 
 # kill sshd and wait for watchdog to save us
 $run killall sshd || true
-while [ "`$run hostname`" != "phase1" ]; do
+while [ "$($run hostname)" != "phase1" ]; do
     sleep 10;
 done
-
-# test that we can install a new kernel
-$run ramroot-aptkludge start || true
-sleep 10
-$run ramroot-aptkludge start
-$run apt-get update
-if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then
-    $run apt-get -y --force-yes install linux-image-2.6-vserver-amd64
-    $run readlink /vmlinuz | grep vserver-amd64
-else
-    $run apt-get -y --force-yes install linux-image-2.6-686
-    $run readlink /vmlinuz | grep 686
-fi
-
-# reboot to the new kernel
-$run "echo phase3 > /etc/hostname"
-$run ramroot-admin ramroot-snapshot 2 3 "phase3"
-$run ramroot-admin ramroot-update-grub 3
-echo b | $run dd of=/proc/sysrq-trigger &
-sleep 10
-while [ "`$run hostname`" != "phase3" ]; do
-    sleep 10;
-done
-if [ "`dpkg-architecture -qDEB_BUILD_ARCH`" = "amd64" ]; then
-    [ "`$run uname -r | grep vserver-amd64`" != "" ]
-else
-    [ "`$run uname -r | grep 686`" != "" ]
-fi
-
-rm $known_hosts
-echo OK

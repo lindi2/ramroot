@@ -8,6 +8,11 @@ prev="$1"
 new="$2"
 desc="$3"
 
+if [ "$desc" = "" ]; then
+    echo "usage: $0 PREV-SNAPSHOT NEW-SNAPSHOT DESCRIPTION" 1>&2
+    exit 1
+fi
+
 if [ ! -d "$ramroot/snapshot/$prev" ]; then
     echo "Old snapshot $prev does not exist"
     exit 1
@@ -18,7 +23,7 @@ if [ -d "$ramroot/snapshot/$new" ]; then
     exit 1
 fi
 
-echo "#${new} `date -u +"%Y-%m-%d %H:%M"` ${desc}" > /etc/ramroot/grub-title
+echo "#${new} $(date -u +"%Y-%m-%d %H:%M") ${desc}" > /etc/ramroot/grub-title
 
 mount -o remount,rw $ramroot
 rsync --numeric-ids -ax --delete --link-dest=../${prev} --exclude $ramroot / $ramroot/snapshot/${new}

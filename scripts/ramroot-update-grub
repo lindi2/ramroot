@@ -18,6 +18,11 @@ default="$1"
 fallback="$2"
 fallback_timeout="$3"
 
+if [ "$default" = "" ]; then
+    echo "usage: $0 DEFAULT-SNAPSHOT [FALLBACK-SNAPSHOT FALLBACK-TIMEOUT]" 1>&2
+    exit 1
+fi
+
 if [ ! -d "$ramroot/snapshot/$default/boot" ]; then
     echo "Default snapshot does not exist"
     exit 1
@@ -27,18 +32,18 @@ if [ -e /etc/ramroot/boot-info ]; then
     . /etc/ramroot/boot-info
 fi
 
-entries=`mktemp`
+entries=$(mktemp)
 idx=0
-for i in `cd $ramroot/snapshot && echo *`; do
+for i in $(cd $ramroot/snapshot && echo *); do
     if [ "$i" = "$default" ]; then
 	default_idx=$idx
     fi
     if [ "$i" = "$fallback" ]; then
 	fallback_idx=$idx
     fi
-    title="`cat $ramroot/snapshot/$i/etc/ramroot/grub-title`"
-    extraopts=" ramroot_uuid=$boot_uuid ramroot_snapshot=$i panic=60"
-    extraopts+=" `cat $ramroot/snapshot/$i/etc/ramroot/grub-extraopts`"
+    title="$(cat $ramroot/snapshot/$i/etc/ramroot/grub-title)"
+    extraopts=" ramroot_uuid=$boot_uuid ramroot_snapshot=$i debug=1"
+    extraopts+=" $(cat $ramroot/snapshot/$i/etc/ramroot/grub-extraopts)"
     if [ "$fallback" != "" -a "$i" = "$default" ]; then
 	extraopts+=" ramroot_watchdog=$fallback_timeout"
     fi
@@ -62,10 +67,10 @@ EOF
 }
 EOF
     echo >> $entries
-    idx="`expr $idx + 1`"
+    idx="$(expr $idx + 1)"
 done
 
-newlst=`mktemp`
+newlst=$(mktemp)
 echo "set timeout=10" >> $newlst
 echo "set root='(hd0,msdos1)'" >> $newlst
 if [ "$fallback" != "" ]; then

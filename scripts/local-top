@@ -7,17 +7,16 @@ case "$1" in
 esac
 echo "ramroot: local-top"
 set -x
-echo > /conf/param.conf
 # defaults
 echo "export ramroot_uuid=962d307f-8f1f-4301*" >> /conf/param.conf
 echo "export ramroot_fs_uuid=ffda8257-f78a-4893*" >> /conf/param.conf
 echo "export ramroot_snapshot=0" >> /conf/param.conf
-mem="`free | grep Mem: | awk '{ print $2 }'`"
+mem="$(free | grep Mem: | awk '{ print $2 }')"
 if [ $mem -lt 180000 ]; then
     echo "export ramroot_fs=jffs2" >> /conf/param.conf
     echo "export ramroot_fs_size=90000" >> /conf/param.conf
 else
-    fs_size="`expr $mem - 10000`"
+    fs_size="$(expr $mem - 10000)"
     echo "export ramroot_fs=tmpfs" >> /conf/param.conf
     echo "export ramroot_fs_size=$fs_size" >> /conf/param.conf
 fi
@@ -35,4 +34,5 @@ if [ "$ramroot_watchdog" != "" ]; then
     mknod /dev/watchdog c 10 130
     echo -n S > /dev/watchdog
 fi
-#/bin/sh
+echo "rm /conf/param.conf" >> /conf/param.conf
+exit 0
