@@ -1,0 +1,21 @@
+#!/bin/sh
+command="$1"
+if [ "$command" = "" ]; then
+    echo "usage: $0 [stop|start|refresh]" 1>&2
+    exit 1
+fi
+
+case "$command" in
+    start|refresh)
+	echo -n S > /dev/watchdog
+	;;
+    stop)
+	echo -n V > /dev/watchdog
+	;;
+    *)
+	echo "usage: $0 [stop|start|refresh]" 1>&2
+	exit 1
+	;;
+esac
+    
+
