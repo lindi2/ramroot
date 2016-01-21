@@ -20,7 +20,7 @@ if [ "$debian_mirror" = "" ]; then
 fi
 sudo debootstrap jessie $build_dir/fs/snapshot/0 $debian_mirror
 remove="apt-utils bsdmainutils groff-base iptables"
-remove+=" libgdbm3"
+remove+=" libgdbm3 manpages libicu52 debconf-i18n"
 remove+=" libnewt0.52 libpopt0"
 remove+=" logrotate man-db nano tasksel"
 remove+=" vim-common vim-tiny wget"
