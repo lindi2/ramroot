@@ -60,3 +60,5 @@ $run killall sshd || true
 while [ "$($run hostname)" != "phase1" ]; do
     sleep 10;
 done
+
+echo "Testsuite passed!"
