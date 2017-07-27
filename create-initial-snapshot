@@ -30,6 +30,7 @@ sudo chroot $build_dir/fs/snapshot/0 apt-get -y --force-yes remove $remove
 sudo chroot $build_dir/fs/snapshot/0 dpkg -P $remove
 add="openssh-server"
 add+=" busybox systemd-sysv rsync"
+add+=" grub-pc"
 if [ "$(dpkg-architecture -qDEB_BUILD_ARCH)" = "amd64" ]; then
     add+=" linux-image-amd64"
 else

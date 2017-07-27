@@ -47,11 +47,17 @@ sudo mount $build_dir/img $build_dir/mnt -oloop,offset=$(expr $part_begin \* 102
 sudo cp -a $build_dir/fs/snapshot $build_dir/mnt
 sudo mkdir -p $build_dir/mnt/boot/grub
 sudo touch $build_dir/mnt/boot/grub/device.map
-sudo grub-install --modules "part_msdos biosdisk ext2 search_fs_uuid" --root-directory $(pwd)/$build_dir/mnt --no-floppy $img_loop
+
+sudo mount /dev $build_dir/mnt/snapshot/0/dev -obind
+sudo chroot $build_dir/mnt/snapshot/0 grub-install --modules 'part_msdos biosdisk ext2 search_fs_uuid' --root-directory / --no-floppy $img_loop
+sudo mv $build_dir/mnt/snapshot/0/boot/grub/i386-pc $build_dir/mnt/boot/grub
+sudo umount $build_dir/mnt/snapshot/0/dev
 sudo umount $build_dir/mnt
 sudo losetup -d $img_loop
 
 sudo mount $build_dir/img $build_dir/mnt -oloop,offset=$(expr $part_begin \* 1024 \* 1024)
 sudo sh -c "ramroot_build=1 ramroot=$build_dir/mnt boot_uuid=$ramroot_uuid $build_dir/mnt/snapshot/0/usr/local/bin/ramroot-update-grub 0"
+sync
+sleep 2
 sudo umount $build_dir/mnt
 rmdir $build_dir/mnt
