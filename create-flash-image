@@ -42,7 +42,7 @@ sudo tune2fs -U $ramroot_uuid "${loopdev}"
 sync
 sudo losetup -d "${loopdev}"
 
-img_loop=$(sudo losetup -f --show $build_dir/img)
+img_loop=$(sudo losetup -f --sizelimit $(expr $part_begin \* 1024 \* 1024) --show $build_dir/img)
 sudo mount $build_dir/img $build_dir/mnt -oloop,offset=$(expr $part_begin \* 1024 \* 1024)
 sudo cp -a $build_dir/fs/snapshot $build_dir/mnt
 sudo mkdir -p $build_dir/mnt/boot/grub
