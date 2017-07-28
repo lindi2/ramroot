@@ -36,6 +36,7 @@ if [ "$(dpkg-architecture -qDEB_BUILD_ARCH)" = "amd64" ]; then
 else
     add+=" linux-image-686"
 fi
+echo grub-pc grub-pc/install_devices_empty boolean true | sudo chroot $build_dir/fs/snapshot/0 debconf-set-selections
 sudo chroot $build_dir/fs/snapshot/0 apt-get --no-install-recommends --force-yes -y install $add
 sudo mkdir -p $build_dir/fs/snapshot/0/etc/ramroot
 echo "$version $modified" | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/origin 2> /dev/null
