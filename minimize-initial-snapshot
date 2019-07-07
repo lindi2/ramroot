@@ -7,7 +7,7 @@ if [ "$build_dir" = "" ]; then
     build_dir="."
 fi
 sudo chroot $build_dir/fs/snapshot/0 apt-get clean
-sudo rm $build_dir/fs/snapshot/0/var/lib/apt/lists/*Packages
+sudo rm -f $build_dir/fs/snapshot/0/var/lib/apt/lists/*Packages
 sudo rm -fr $build_dir/fs/snapshot/0/var/cache/apt
 sudo mkdir $build_dir/fs/snapshot/0/var/cache/apt
 sudo rm -fr $build_dir/fs/snapshot/0/usr/share/locale
