@@ -18,14 +18,8 @@ sudo mkdir -p $build_dir/fs/snapshot/0
 if [ "$debian_mirror" = "" ]; then
     debian_mirror="http://ftp.debian.org/debian"
 fi
-sudo debootstrap jessie $build_dir/fs/snapshot/0 $debian_mirror
-remove="apt-utils bsdmainutils groff-base iptables"
-remove+=" libgdbm3 manpages libicu52 debconf-i18n"
-remove+=" libnewt0.52 libpopt0"
-remove+=" logrotate man-db nano tasksel"
-remove+=" vim-common vim-tiny wget"
-remove+=" libboost-iostreams1.55.0 "
-remove+=" libnfnetlink0 libsigc++-2.0-0c2a"
+sudo debootstrap buster $build_dir/fs/snapshot/0 $debian_mirror
+remove="apt-utils bsdmainutils nano tasksel vim-common vim-tiny iptables logrotate libslang2 whiptail"
 sudo chroot $build_dir/fs/snapshot/0 apt-get -y --force-yes remove $remove
 sudo chroot $build_dir/fs/snapshot/0 dpkg -P $remove
 add="openssh-server"
