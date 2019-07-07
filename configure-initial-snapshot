@@ -9,7 +9,7 @@ fi
 echo hostname-not-set | sudo tee $build_dir/fs/snapshot/0/etc/hostname
 echo -e "auto lo\niface lo inet loopback\n\nauto eth0\niface eth0 inet dhcp" | sudo tee $build_dir/fs/snapshot/0/etc/network/interfaces
 echo "#0 `date -u +"%Y-%m-%d %H:%M"` initial snapshot" | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/grub-title
-sudo touch $build_dir/fs/snapshot/0/etc/ramroot/grub-extraopts
+echo "net.ifnames=0 biosdevname=0" | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/grub-extraopts
 sudo mkdir -p $build_dir/fs/snapshot/0/root/.ssh
 sudo cp ~/.ssh/id_rsa.pub $build_dir/fs/snapshot/0/root/.ssh/authorized_keys
 echo "retry 3600;" | sudo tee -a $build_dir/fs/snapshot/0/etc/dhcp/dhclient.conf
