@@ -16,4 +16,33 @@ sudo rm -fr $build_dir/fs/snapshot/0/usr/share/doc
 sudo mkdir $build_dir/fs/snapshot/0/usr/share/doc
 sudo rm -fr $build_dir/fs/snapshot/0/usr/share/man/??
 sudo rm -fr $build_dir/fs/snapshot/0/usr/share/man/??_*
-sudo rm -fr $build_dir/fs/snapshot/0/lib/modules/*/kernel/{sound,drivers/media,drivers/isdn,drivers/video}
+sudo rm -fr $build_dir/fs/snapshot/0/lib/modules/*/kernel/{sound,drivers/media,drivers/isdn,drivers/video,drivers/gpu}
+sudo rm -fr $build_dir/fs/snasphot/0/boot/System.map-*
+for i in \
+    fs/xfs/xfs.ko \
+    fs/btrfs/btrfs.ko \
+    fs/ocfs2/ocfs2.ko \
+    drivers/scsi/lpfc/lpfc.ko \
+    lib/test_bpf.ko \
+    drivers/scsi/qla2xxx/qla2xxx.ko \
+    drivers/infiniband/hw/hfi1/hfi1.ko \
+    drivers/scsi/bfa/bfa.ko \
+    fs/f2fs/f2fs.ko \
+    fs/ceph/ceph.ko \
+    drivers/block/drbd/drbd.ko \
+    fs/ubifs/ubifs.ko \
+    net/sctp/sctp.ko \
+    drivers/infiniband/hw/qib/ib_qib.ko \
+    net/ceph/libceph.ko \
+    fs/nilfs2/nilfs2.ko \
+    fs/reiserfs/reiserfs.ko \
+    drivers/infiniband/hw/cxgb4/iw_cxgb4.ko \
+    fs/afs/kafs.ko \
+    fs/ocfs2/dlm/ocfs2_dlm.ko \
+    fs/dlm/dlm.ko \
+    drivers/infiniband/hw/i40iw/i40iw.ko \
+    fs/jfs/jfs.ko \
+    drivers/mtd/ubi/ubi.ko \
+    drivers/infiniband/hw/nes/iw_nes.ko; do
+    sudo rm -f $build_dir/fs/snapshot/0/lib/modules/*/kernel/$i
+done
