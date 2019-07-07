@@ -34,10 +34,10 @@ EOF
 if [ ! -e /dev/loop0 ]; then
     sudo modprobe loop
 fi
-loopdev="`sudo losetup -f`"
+loopdev="$(sudo losetup -f)"
 sudo losetup -o $(expr $part_begin \* 1024 \* 1024) --sizelimit $(expr $part_size \* 1024 \* 1024) "${loopdev}" $build_dir/img
 sudo mkfs -t ext2 -b 4096 "${loopdev}"
-ramroot_uuid="`uuidgen | sed 's@^........-....-....@962d307f-8f1f-4301@'`"
+ramroot_uuid="$(uuidgen | sed 's@^........-....-....@962d307f-8f1f-4301@')"
 sudo tune2fs -U $ramroot_uuid "${loopdev}"
 sync
 sudo losetup -d "${loopdev}"
