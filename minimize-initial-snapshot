@@ -16,4 +16,4 @@ sudo rm -fr $build_dir/fs/snapshot/0/usr/share/doc
 sudo mkdir $build_dir/fs/snapshot/0/usr/share/doc
 sudo rm -fr $build_dir/fs/snapshot/0/usr/share/man/??
 sudo rm -fr $build_dir/fs/snapshot/0/usr/share/man/??_*
-sudo rm -fr $build_dir/fs/snapshot/0/lib/modules/3.*/kernel/{sound,drivers/media,drivers/isdn,drivers/video}
+sudo rm -fr $build_dir/fs/snapshot/0/lib/modules/*/kernel/{sound,drivers/media,drivers/isdn,drivers/video}
