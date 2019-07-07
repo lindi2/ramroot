@@ -46,3 +46,10 @@ for i in \
     drivers/infiniband/hw/nes/iw_nes.ko; do
     sudo rm -f $build_dir/fs/snapshot/0/lib/modules/*/kernel/$i
 done
+(
+    for i in $(find $build_dir/fs/snapshot/0/lib/modules -name "*.ko"); do
+        if [ "$(file "$i"|grep ELF)" != "" ]; then
+            echo "$i"
+        fi
+    done
+) | sudo sh -c 'while read i; do xz -v -9 $i; mv -vi $i.xz $i; done'
