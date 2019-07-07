@@ -3,9 +3,9 @@ set -e
 set -x
 export LC_ALL=C
 
-image_size=580 # MB
+image_size=480 # MB
 part_begin=1 # MB
-part_size=577 # MB
+part_size=477 # MB
 
 if [ "$build_dir" = "" ]; then
     build_dir="."
