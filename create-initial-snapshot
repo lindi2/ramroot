@@ -16,7 +16,7 @@ fi
 if [ -d $build_dir/fs ]; then sudo rm -fr $build_dir/fs; fi
 sudo mkdir -p $build_dir/fs/snapshot/0
 if [ "$debian_mirror" = "" ]; then
-    debian_mirror="http://ftp.debian.org/debian"
+    debian_mirror="http://deb.debian.org/debian"
 fi
 sudo debootstrap buster $build_dir/fs/snapshot/0 $debian_mirror
 remove="apt-utils bsdmainutils nano tasksel vim-common vim-tiny iptables logrotate libslang2 whiptail"
