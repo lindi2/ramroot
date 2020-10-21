@@ -22,6 +22,5 @@ sudo install scripts/local-top $build_dir/fs/snapshot/0/etc/initramfs-tools/scri
 sudo install scripts/local-premount $build_dir/fs/snapshot/0/etc/initramfs-tools/scripts/local-premount/ramroot
 sudo install scripts/hooks $build_dir/fs/snapshot/0/etc/initramfs-tools/hooks/ramroot
 sudo chroot $build_dir/fs/snapshot/0 update-initramfs -k all -c -t
-sudo chroot $build_dir/fs/snapshot/0 ln -sf $(sudo chroot $build_dir/fs/snapshot/0 readlink initrd.img | sed 's@^/@@') initrd.img
 
 sudo install scripts/ramroot-{aptkludge,snapshot,update-grub,admin,watchdog} $build_dir/fs/snapshot/0/usr/local/bin
