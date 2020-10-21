@@ -9,7 +9,15 @@ new="$2"
 desc="$3"
 
 if [ "$desc" = "" ]; then
-    echo "usage: $0 PREV-SNAPSHOT NEW-SNAPSHOT DESCRIPTION" 1>&2
+    (
+        cat <<EOF
+usage: $0 PREV-SNAPSHOT NEW-SNAPSHOT DESCRIPTION
+
+Create a new snapshot of the filesystem and save it as
+NEW-SNAPSHOT. Use PREV-SNAPSHOT as the base snapshot
+(this is almost always NEW-SNAPSHOT minus one).
+EOF
+    ) 1>&2
     exit 1
 fi
 

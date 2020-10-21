@@ -19,7 +19,26 @@ fallback="$2"
 fallback_timeout="$3"
 
 if [ "$default" = "" ]; then
-    echo "usage: $0 DEFAULT-SNAPSHOT [FALLBACK-SNAPSHOT FALLBACK-TIMEOUT]" 1>&2
+    (
+        cat <<EOF
+usage: $0 DEFAULT-SNAPSHOT [FALLBACK-SNAPSHOT FALLBACK-TIMEOUT]
+
+Generate GRUB configuration that tries to boot DEFAULT-SNAPSHOT.
+
+If FALLBACK-SNAPSHOT and FALLBACK-TIMEOUT are specified, a watchdog
+will reset the system and GRUB will boot the snapshot
+FALLBACK-SNAPSHOT.
+
+You can stop watchdog using the command
+
+ramroot-watchdog stop
+
+or keep refreshing it using
+
+ramroot-watchdog refresh
+
+EOF
+    ) 1>&2
     exit 1
 fi
 

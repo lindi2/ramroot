@@ -1,4 +1,24 @@
 #!/bin/sh
+if [ "$1" = "--help" -o "$1" = "-h" ]; then
+    (
+        cat <<EOF
+usage: $0 [--help] COMMAND
+
+Run COMMAND so that the ramroot environment variable points to the
+read-only mounted ramroot snapshot directory.
+
+If no COMMAND is specified, shell is started with a timeout of 10 minutes.
+
+Examples:
+
+ramroot-admin ramroot-update-grub 4 3 600
+ramroot-admin ramroot-snapshot 10 11 "upgrade to Debian 11"
+ramroot-admin
+EOF
+    ) 1>&2
+    exit 0
+fi
+
 . /etc/ramroot/boot-info
 export ramroot="$(mktemp -d)"
 mount -o ro -U "${boot_uuid}" $ramroot

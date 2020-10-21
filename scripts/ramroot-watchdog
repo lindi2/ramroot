@@ -1,7 +1,17 @@
 #!/bin/sh
 command="$1"
 if [ "$command" = "" ]; then
-    echo "usage: $0 [stop|start|refresh]" 1>&2
+    (
+        cat <<EOF
+usage: $0 [stop|start|refresh]
+
+Start, stop or refresh watchdog. If watchdog is running it needs to be
+refreshed periodically or the system will reset. If you e.g. have a
+remote system running refresh over SSH you can ensure that the system
+stays reachable over network even if you modify firewall or routing
+rules.
+EOF
+    ) 1>&2
     exit 1
 fi
 
