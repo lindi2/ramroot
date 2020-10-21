@@ -48,7 +48,7 @@ done
 # create snapshot 2 and boot to it with watchdog fallback
 $run "echo phase2 > /etc/hostname"
 $run ramroot-admin ramroot-snapshot 1 2 "phase2"
-$run ramroot-admin ramroot-update-grub 2 1 300
+$run ramroot-admin ramroot-update-grub 2 1 120
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
 while [ "$($run hostname)" != "phase2" ]; do
