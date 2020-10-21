@@ -23,6 +23,7 @@ finnish keyboard layout
 is there a way to make usb stick read-only under linux?
 detect memory size, use jffs2 for < 180M, tmpfs for others
 add warning banner to motd so that admins understand changes will not persist
+log commands
 
 http://lwn.net/Articles/219827/
 
