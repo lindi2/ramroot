@@ -35,4 +35,4 @@ sudo chroot $build_dir/fs/snapshot/0 apt-get --no-install-recommends --force-yes
 sudo mkdir -p $build_dir/fs/snapshot/0/etc/ramroot
 echo "$version $modified" | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/origin 2> /dev/null
 git log -10 -p | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/gitlog 2> /dev/null
-sudo bzip2 -9 $build_dir/fs/snapshot/0/etc/ramroot/gitlog
+sudo gzip -9 $build_dir/fs/snapshot/0/etc/ramroot/gitlog
