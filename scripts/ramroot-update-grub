@@ -103,7 +103,7 @@ cat $entries >> $newlst
 rm $entries
 
 if ! grep initrd $newlst > /dev/null; then
-    echo incomplete menu.lst
+    echo incomplete grub.cfg
     exit 1
 fi
 
