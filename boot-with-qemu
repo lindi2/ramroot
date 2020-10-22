@@ -11,5 +11,5 @@ if [ "$img" = "" ]; then
     img="$build_dir/img"
 fi
 
-kvm -hda $img -boot c -m 1024 -curses -net user,hostfwd=tcp::8022-:22 -net nic,model=e1000,macaddr=52:54:00:12:36:03
+kvm -drive file=$img,format=raw -boot c -m 1024 -curses -net user,hostfwd=tcp::8022-:22 -net nic,model=e1000,macaddr=52:54:00:12:36:03
 
