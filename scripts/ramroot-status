@@ -1,0 +1,34 @@
+#!/bin/sh
+
+. /etc/ramroot/boot-info
+
+if [ "$(whoami)" != "root" ]; then
+    echo "Sorry, you need to be root to run this tool"
+    exit 1
+fi
+
+ramroot="$(mktemp -d)"
+if ! mount -o ro -U "${boot_uuid}" "$ramroot"; then
+    echo "Unable to mount ramroot snapshot filesystem"
+    exit 1
+fi
+
+. "$ramroot/boot/grub/grub.cfg.info"
+
+for i in $(cd "$ramroot/snapshot" && echo *); do
+    echo "$i $(cat $ramroot/snapshot/$i/etc/ramroot/grub-title)"
+    if [ "$i" = "$boot_snapshot" ]; then
+        echo "- running snapshot"
+        echo "  - booted on $(date -Is -d @$(expr $(date +%s) - $(cat /proc/uptime |cut -d. -f1)))"
+        echo "  - uptime $(uptime --pretty|cut -d' ' -f2-)"
+    fi
+    if [ "$i" = "$default" ]; then
+        echo "- default snapshot"
+    fi
+    if [ "$i" = "$fallback" ]; then
+        echo "- fallback snapshot"
+        echo "  - fallback timeout $fallback_timeout"
+    fi
+done
+
+umount "$ramroot"
