@@ -17,12 +17,11 @@ $run [ -d /etc/ramroot ]
 [ "$($run '. /etc/ramroot/boot-info; fsck -n /dev/disk/by-uuid/$boot_uuid'|grep ": clean,")" != "" ]
 
 # create a snapshot and boot to it
-$run ramroot-aptkludge start
 $run apt-get update
 $run apt-get -y --force-yes install rsync psmisc
 $run "echo phase1 > /etc/hostname"
-$run ramroot-admin ramroot-snapshot 0 1 phase1
-$run ramroot-admin ramroot-update-grub 1
+$run ramroot-snapshot phase1
+$run ramroot-update-grub 1
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
 while [ "$($run hostname)" != "phase1" ]; do
@@ -30,7 +29,7 @@ while [ "$($run hostname)" != "phase1" ]; do
 done
 
 # boot back to initial snapshot
-$run ramroot-admin ramroot-update-grub 0
+$run ramroot-update-grub 0
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
 while [ "$($run hostname)" != "hostname-not-set" ]; do
@@ -38,7 +37,7 @@ while [ "$($run hostname)" != "hostname-not-set" ]; do
 done
 
 # boot again to snapshot 1
-$run ramroot-admin ramroot-update-grub 1
+$run ramroot-update-grub 1
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
 while [ "$($run hostname)" != "phase1" ]; do
@@ -47,8 +46,8 @@ done
 
 # create snapshot 2 and boot to it with watchdog fallback
 $run "echo phase2 > /etc/hostname"
-$run ramroot-admin ramroot-snapshot 1 2 "phase2"
-$run ramroot-admin ramroot-update-grub 2 1 120
+$run ramroot-snapshot "phase2"
+$run ramroot-update-grub 2 1 120
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
 while [ "$($run hostname)" != "phase2" ]; do
