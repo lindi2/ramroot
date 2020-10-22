@@ -9,8 +9,8 @@ build_grubenv() {
     ) | dd bs=1 count=1024 2> /dev/null
 }
 
-if [ "$ramroot" = "" ]; then
-    echo "Use only with ramroot-admin"
+if [ "$(whoami)" != "root" ]; then
+    echo "Sorry, you need to be root to run this tool"
     exit 1
 fi
 
@@ -21,25 +21,27 @@ fallback_timeout="$3"
 if [ "$default" = "" ]; then
     (
         cat <<EOF
-usage: $0 DEFAULT-SNAPSHOT [FALLBACK-SNAPSHOT FALLBACK-TIMEOUT]
+usage: ramroot-update-grub SNAPSHOT [FALLBACK-SNAPSHOT FALLBACK-TIMEOUT]
 
-Generate GRUB configuration that tries to boot DEFAULT-SNAPSHOT.
-
-If FALLBACK-SNAPSHOT and FALLBACK-TIMEOUT are specified, a watchdog
-will reset the system and GRUB will boot the snapshot
-FALLBACK-SNAPSHOT.
-
-You can stop watchdog using the command
-
-ramroot-watchdog stop
-
-or keep refreshing it using
-
-ramroot-watchdog refresh
-
+Configure boot loader to boot SNAPSHOT. If FALLBACK-SNAPSHOT and
+FALLBACK-TIMEOUT are specified the system will start with a watchdog
+that will reset the system to FALLBACK-SNAPSHOT if the watchdog is not
+refreshed regularly or stopped. You can control the watchdog using the
+ramroot-watchdog command.
 EOF
     ) 1>&2
     exit 1
+fi
+
+if [ -e /etc/ramroot/boot-info ]; then
+    . /etc/ramroot/boot-info
+fi
+if [ "$ramroot_build" = "" ]; then
+    ramroot="$(mktemp -d)"
+    if ! mount -o ro -U "$boot_uuid" "$ramroot"; then
+        echo "Unable to mount ramroot snapshot filesystem"
+        exit 1
+    fi
 fi
 
 if [ ! -d "$ramroot/snapshot/$default/boot" ]; then
@@ -47,22 +49,19 @@ if [ ! -d "$ramroot/snapshot/$default/boot" ]; then
     exit 1
 fi
 
-if [ -e /etc/ramroot/boot-info ]; then
-    . /etc/ramroot/boot-info
-fi
 
-entries=$(mktemp)
+entries="$(mktemp)"
 idx=0
-for i in $(cd $ramroot/snapshot && echo *); do
+for i in $(cd "$ramroot/snapshot" && echo *); do
     if [ "$i" = "$default" ]; then
 	default_idx=$idx
     fi
     if [ "$i" = "$fallback" ]; then
 	fallback_idx=$idx
     fi
-    title="$(cat $ramroot/snapshot/$i/etc/ramroot/grub-title)"
-    extraopts=" ramroot_uuid=$boot_uuid ramroot_snapshot=$i debug=1"
-    extraopts+=" $(cat $ramroot/snapshot/$i/etc/ramroot/grub-extraopts)"
+    title="$(cat "$ramroot/snapshot/$i/etc/ramroot/grub-title")"
+    extraopts=" ramroot_uuid=$boot_uuid ramroot_snapshot=$i"
+    extraopts+=" $(cat "$ramroot/snapshot/$i/etc/ramroot/grub-extraopts")"
     if [ "$fallback" != "" -a "$i" = "$default" ]; then
 	extraopts+=" ramroot_watchdog=$fallback_timeout"
     fi
@@ -73,7 +72,7 @@ EOF
 	echo " set savedefault=$fallback_idx" >> $entries
 	echo " save_env savedefault" >> $entries
     fi
-    cat >> $entries <<EOF
+    cat >> "$entries" <<EOF
  insmod part_msdos
  insmod ext2
  set root='(hd0,msdos1)'
@@ -85,37 +84,44 @@ EOF
  echo 'Now booting the kernel ...'
 }
 EOF
-    echo >> $entries
+    echo >> "$entries"
     idx="$(expr $idx + 1)"
 done
 
-newlst=$(mktemp)
-echo "set timeout=10" >> $newlst
-echo "set root='(hd0,msdos1)'" >> $newlst
+grubcfg="$(mktemp)"
+echo "set timeout=10" >> "$grubcfg"
+echo "set root='(hd0,msdos1)'" >> "$grubcfg"
 if [ "$fallback" != "" ]; then
-    echo "load_env" >> $newlst
-    echo "set default=\${savedefault}" >> $newlst
+    echo "load_env" >> $grubcfg
+    echo "set default=\${savedefault}" >> "$grubcfg"
 else
-    echo "set default=\"$default_idx\"" >> $newlst
+    echo "set default=\"$default_idx\"" >> "$grubcfg"
 fi
-echo >> $newlst
-cat $entries >> $newlst
-rm $entries
+echo >> "$grubcfg"
+cat "$entries" >> "$grubcfg"
+rm "$entries"
 
-if ! grep initrd $newlst > /dev/null; then
+if ! grep initrd "$grubcfg" > /dev/null; then
     echo incomplete grub.cfg
     exit 1
 fi
 
 if [ "$ramroot_build" = "" ]; then
-    mount -o remount,rw $ramroot
+    mount -o remount,rw "$ramroot"
 fi
-mv $newlst $ramroot/boot/grub/grub.cfg
+mv "$grubcfg" "$ramroot/boot/grub/grub.cfg"
+grubcfginfo="$(mktemp)"
+echo default=$default >> "$grubcfginfo"
 if [ "$fallback" != "" ]; then
-    echo "savedefault=$default_idx" | build_grubenv > $ramroot/boot/grub/grubenv
+    echo fallback=$fallback >> "$grubcfginfo"
+    echo fallback_timeout=$fallback_timeout >> "$grubcfginfo"
+fi
+mv "$grubcfginfo" "$ramroot/boot/grub/grub.cfg.info"
+if [ "$fallback" != "" ]; then
+    echo "savedefault=$default_idx" | build_grubenv > "$ramroot/boot/grub/grubenv"
 else
-    echo -n "" | build_grubenv > $ramroot/boot/grub/grubenv
+    echo -n "" | build_grubenv > "$ramroot/boot/grub/grubenv"
 fi
 if [ "$ramroot_build" = "" ]; then
-    mount -o remount,ro $ramroot
+    umount "$ramroot"
 fi
