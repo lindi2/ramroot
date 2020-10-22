@@ -1,9 +1,9 @@
 #!/bin/sh
 command="$1"
-if [ "$command" = "" ]; then
+if [ "$command" = "" -o "$command" = "--help" -o "$command" = "-h" ]; then
     (
         cat <<EOF
-usage: $0 [stop|start|refresh]
+usage: ramroot-watchdog [stop|start|refresh]
 
 Start, stop or refresh watchdog. If watchdog is running it needs to be
 refreshed periodically or the system will reset. If you e.g. have a
