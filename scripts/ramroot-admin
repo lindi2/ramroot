@@ -21,7 +21,10 @@ fi
 
 . /etc/ramroot/boot-info
 export ramroot="$(mktemp -d)"
-mount -o ro -U "${boot_uuid}" $ramroot
+if ! mount -o ro -U "$boot_uuid" "$ramroot"; then
+    echo "Unable to mount ramroot snapshot filesystem"
+    exit 1
+fi
 if [ "$1" = "" ]; then
     echo "Mounted ramroot read-only at $ramroot (\$ramroot)"
     echo "Spawning shell with 10-minute timeout for umount"
