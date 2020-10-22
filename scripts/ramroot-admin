@@ -32,4 +32,4 @@ if [ "$1" = "" ]; then
 else
     "$@"
 fi
-umount $ramroot
+umount "$ramroot"
