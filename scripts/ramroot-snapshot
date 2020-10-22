@@ -1,38 +1,47 @@
 #!/bin/sh
-if [ "$ramroot" = "" ]; then
-    echo "Use only with ramroot-admin"
+
+. /etc/ramroot/boot-info
+
+if [ "$(whoami)" != "root" ]; then
+    echo "Sorry, you need to be root to run this tool"
     exit 1
 fi
 
-prev="$1"
-new="$2"
-desc="$3"
-
+desc="$1"
 if [ "$desc" = "" ]; then
     (
         cat <<EOF
-usage: $0 PREV-SNAPSHOT NEW-SNAPSHOT DESCRIPTION
+usage: ramroot-snapshot DESCRIPTION
 
-Create a new snapshot of the filesystem and save it as
-NEW-SNAPSHOT. Use PREV-SNAPSHOT as the base snapshot
-(this is almost always NEW-SNAPSHOT minus one).
+Create a snapshot of the running system.
 EOF
     ) 1>&2
     exit 1
 fi
 
+prev="$boot_snapshot"
+ramroot="$(mktemp -d)"
+if ! mount -o ro -U "$boot_uuid" "$ramroot"; then
+    echo "Unable to mount ramroot snapshot filesystem"
+    exit 1
+fi
 if [ ! -d "$ramroot/snapshot/$prev" ]; then
     echo "Old snapshot $prev does not exist"
+    umount "$ramroot"
     exit 1
 fi
-
-if [ -d "$ramroot/snapshot/$new" ]; then
-    echo "New snapshot already exists"
-    exit 1
-fi
+new="$prev"
+while [ -d "$ramroot/snapshot/$new" ]; do
+    new="$(expr $new + 1)"
+done
 
 echo "#${new} $(date -u +"%Y-%m-%d %H:%M") ${desc}" > /etc/ramroot/grub-title
 
-mount -o remount,rw $ramroot
-rsync --numeric-ids -ax --delete --link-dest=../${prev} --exclude $ramroot / $ramroot/snapshot/${new}
-mount -o remount,ro $ramroot
+mount -o remount,rw "$ramroot"
+
+rsync --numeric-ids -ax --delete --link-dest=../${prev} --exclude "$ramroot" / "$ramroot/snapshot/${new}"
+
+umount "$ramroot"
+
+echo "Created snapshot $new"
+
