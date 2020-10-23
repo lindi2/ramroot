@@ -122,9 +122,16 @@ snapshot_enable() {
 
     ramroot_mount_ro
     if [ ! -d "$ramroot/snapshot/$default/boot" ]; then
+        ramroot_umount
         fatal "Default snapshot does not exist"
     fi
 
+    if [ "$fallback" != "" ]; then
+        if [ ! -d "$ramroot/snapshot/$fallback/boot" ]; then
+            ramroot_umount
+            fatal "Fallback snapshot does not exist"
+        fi
+    fi
     if [ "$fallback_timeout" = "" ]; then
         fallback_timeout=600
     fi
@@ -181,6 +188,7 @@ EOF
     rm "$entries"
 
     if ! grep initrd "$grubcfg" > /dev/null; then
+        ramroot_umount
         fatal incomplete grub.cfg
     fi
 
