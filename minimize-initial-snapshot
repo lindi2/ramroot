@@ -18,6 +18,7 @@ sudo rm -fr $build_dir/fs/snapshot/0/usr/share/man/??
 sudo rm -fr $build_dir/fs/snapshot/0/usr/share/man/??_*
 sudo rm -fr $build_dir/fs/snapshot/0/lib/modules/*/kernel/{sound,drivers/media,drivers/isdn,drivers/video,drivers/gpu}
 sudo rm -fr $build_dir/fs/snasphot/0/boot/System.map-*
+set +x
 for i in \
     fs/xfs/xfs.ko \
     fs/btrfs/btrfs.ko \
@@ -47,7 +48,6 @@ for i in \
     sudo rm -f $build_dir/fs/snapshot/0/lib/modules/*/kernel/$i
 done
 (
-    set -x
     for i in $(find $build_dir/fs/snapshot/0/lib/modules -name "*.ko"); do
         if [ "$(file "$i"|grep ELF)" != "" ]; then
             echo "$i"
