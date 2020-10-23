@@ -1,22 +1,13 @@
 todo
 ----
 
-give visual indication that watchdog is running
-tell user how he can deactivate watchdog
-provide ramroot-diff?
-make sure no hardware watchdog is present or make them understand longer timeout
-dhclient should try forever
-handle multiple ethernets
 finnish keyboard layout
-add warning banner to motd so that admins understand changes will not persist
+handle multiple ethernets
 log commands
 ext4
 tboot
 
 http://lwn.net/Articles/219827/
-
-runtime: change default hostname to something more descriptive,
-something that mentions ramroot?
 
 doc: /etc/ramroot
 doc: authorized_keys
