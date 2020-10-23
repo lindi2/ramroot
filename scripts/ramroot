@@ -97,7 +97,8 @@ snapshot_list() {
     ramroot_mount_ro
     . "$ramroot/boot/grub/grub.cfg.info"
     for i in $(cd "$ramroot/snapshot" && echo *); do
-        echo "$i $(cat $ramroot/snapshot/$i/etc/ramroot/grub-title)"
+        local size="$(expr $(cat "$ramroot/snapshot/$i/etc/ramroot/size") / 1000000)"
+        echo "$i (${size}MB) $(cat "$ramroot/snapshot/$i/etc/ramroot/grub-title")"
         if [ "$i" = "$boot_snapshot" ]; then
             echo "- running snapshot"
             echo "  - booted on $(date -Is -d @$(expr $(date +%s) - $(cat /proc/uptime |cut -d. -f1)))"
