@@ -6,7 +6,6 @@ case "$1" in
 	;;
 esac
 echo "ramroot: local-premount"
-set -x
 if [ "$ramroot_fs" = "jffs2" ]; then
     echo FSTYPE=jffs2 >> /conf/param.conf
     echo ROOTFLAGS= >> /conf/param.conf
@@ -59,8 +58,6 @@ fi
 
 cat > /ramroot-mountroot <<EOF
 #!/bin/sh
-echo "/ramroot-mountroot"
-set -x
 mount -t \$ROOTFSTYPE \$ROOTFLAGS \$ROOT /root
 mkdir /fs
 modprobe ext2 # for amd64 (x86 has CONFIG_EXT2_FS=y)
