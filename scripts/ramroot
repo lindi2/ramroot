@@ -1,0 +1,300 @@
+#!/bin/sh
+
+usage() {
+cat 1>&2 <<EOF
+usage: ramroot snapshot create DESCRIPTION
+       ramroot snapshot delete ID
+       ramroot snapshot list
+       ramroot snapshot enable ID [fallback FALLBACK-ID [FALLBACK-TIMEOUT]]
+       ramroot watchdog [start|stop|refresh|status]
+       ramroot admin [CMD]
+
+snapshot create: Create a snapshot of the running system.
+
+snapshot enable: Configure boot loader to boot snapshot ID on next
+boot.  If FALLBACK-ID is specified a watchdog will boot snapshot
+FALLBACK-ID if watchdog is not stopped within FALLBACK-TIMEOUT
+seconds. Timeout defaults to 10 minutes.
+
+admin: Run a command in an environment where \$ramroot points to the
+snapshot directory. If no command is specified a shell is started with
+a timeout of 10 minutes.
+EOF
+exit 0
+}
+
+fatal() {
+    echo "$@" 1>&2
+    exit 1
+}
+
+build_grubenv() {
+    (
+	echo "# GRUB Environment Block"
+	cat
+	for i in $(seq 1 1024); do
+	    echo -n "#"
+	done
+    ) | dd bs=1 count=1024 2> /dev/null
+}
+
+ramroot_mount_ro() {
+    if [ "$ramroot_build" != "1" ]; then
+        ramroot="$(mktemp -d)"
+        if ! mount -o ro -U "$boot_uuid" "$ramroot"; then
+            fatal "Unable to mount ramroot snapshot filesystem"
+        fi
+    fi
+}
+
+ramroot_mount_rw() {
+    if [ "$ramroot_build" != "1" ]; then
+        mount -o remount,rw "$ramroot"
+    fi
+}
+
+ramroot_umount() {
+    if [ "$ramroot_build" != "1" ]; then
+        umount "$ramroot"
+    fi
+}
+
+snapshot_create() {
+    local desc="$1"
+    
+    local prev="$boot_snapshot"
+
+    ramroot_mount_ro
+    if [ ! -d "$ramroot/snapshot/$prev" ]; then
+        ramroot_umount
+        fatal "Old snapshot $prev does not exist"
+    fi
+    local new="$prev"
+    while [ -d "$ramroot/snapshot/$new" ]; do
+        new="$(expr $new + 1)"
+    done
+    echo "#${new} $(date -u +"%Y-%m-%d %H:%M") ${desc}" > /etc/ramroot/grub-title
+    ramroot_mount_rw
+    rsync --numeric-ids -ax --delete --link-dest=../${prev} --exclude "$ramroot" / "$ramroot/snapshot/${new}"
+    ramroot_umount
+    echo "Created snapshot $new"
+}
+
+snapshot_delete() {
+    local id="$1"
+    ramroot_mount_ro
+    if [ ! -d "$ramroot/snapshot/$id" ]; then
+        ramroot_umount
+        fatal "Snapshot $id does not exist"
+    fi
+    ramroot_mount_rw
+    rm -fr "$ramroot/snapshot/$id"
+    ramroot_umount
+}
+
+snapshot_list() {
+    ramroot_mount_ro
+    . "$ramroot/boot/grub/grub.cfg.info"
+    for i in $(cd "$ramroot/snapshot" && echo *); do
+        echo "$i $(cat $ramroot/snapshot/$i/etc/ramroot/grub-title)"
+        if [ "$i" = "$boot_snapshot" ]; then
+            echo "- running snapshot"
+            echo "  - booted on $(date -Is -d @$(expr $(date +%s) - $(cat /proc/uptime |cut -d. -f1)))"
+            echo "  - uptime $(uptime --pretty|cut -d' ' -f2-)"
+        fi
+        if [ "$i" = "$default" ]; then
+            echo "- default snapshot"
+        fi
+        if [ "$i" = "$fallback" ]; then
+            echo "- fallback snapshot"
+            echo "  - fallback timeout $fallback_timeout"
+        fi
+    done
+    ramroot_umount
+}
+
+snapshot_enable() {
+    local default="$1"
+    local fallback="$2"
+    local fallback_timeout="$3"
+
+    ramroot_mount_ro
+    if [ ! -d "$ramroot/snapshot/$default/boot" ]; then
+        fatal "Default snapshot does not exist"
+    fi
+
+    if [ "$fallback_timeout" = "" ]; then
+        fallback_timeout=600
+    fi
+
+    local entries="$(mktemp)"
+    local idx=0
+    for i in $(cd "$ramroot/snapshot" && echo *); do
+        if [ "$i" = "$default" ]; then
+	    local default_idx=$idx
+        fi
+        if [ "$i" = "$fallback" ]; then
+	    local fallback_idx=$idx
+        fi
+        title="$(cat "$ramroot/snapshot/$i/etc/ramroot/grub-title")"
+        extraopts=" ramroot_uuid=$boot_uuid ramroot_snapshot=$i"
+        extraopts="$extraopts $(cat "$ramroot/snapshot/$i/etc/ramroot/grub-extraopts")"
+        if [ "$fallback" != "" -a "$i" = "$default" ]; then
+	    extraopts="$extraopts ramroot_watchdog=$fallback_timeout"
+        fi
+        cat >> $entries <<EOF
+menuentry '$title' --class debian --class gnu-linux --class gnu --class os {
+EOF
+        if [ "$fallback" != "" -a "$i" = "$default" ]; then
+	    echo " set savedefault=$fallback_idx" >> $entries
+	    echo " save_env savedefault" >> $entries
+        fi
+        cat >> "$entries" <<EOF
+ insmod part_msdos
+ insmod ext2
+ set root='(hd0,msdos1)'
+ search --no-floppy --fs-uuid --set $boot_uuid
+ echo 'Loading $title'
+ linux /snapshot/$i/vmlinuz $extraopts
+ echo 'Loading initial ramdisk ...'
+ initrd /snapshot/$i/initrd.img
+ echo 'Now booting the kernel ...'
+}
+EOF
+        echo >> "$entries"
+        idx="$(expr $idx + 1)"
+    done
+
+    local grubcfg="$(mktemp)"
+    echo "set timeout=10" >> "$grubcfg"
+    echo "set root='(hd0,msdos1)'" >> "$grubcfg"
+    if [ "$fallback" != "" ]; then
+        echo "load_env" >> $grubcfg
+        echo "set default=\${savedefault}" >> "$grubcfg"
+    else
+        echo "set default=\"$default_idx\"" >> "$grubcfg"
+    fi
+    echo >> "$grubcfg"
+    cat "$entries" >> "$grubcfg"
+    rm "$entries"
+
+    if ! grep initrd "$grubcfg" > /dev/null; then
+        fatal incomplete grub.cfg
+    fi
+
+    ramroot_mount_rw
+    mv "$grubcfg" "$ramroot/boot/grub/grub.cfg"
+    local grubcfginfo="$(mktemp)"
+    echo default=$default >> "$grubcfginfo"
+    if [ "$fallback" != "" ]; then
+        echo fallback=$fallback >> "$grubcfginfo"
+        echo fallback_timeout=$fallback_timeout >> "$grubcfginfo"
+    fi
+    mv "$grubcfginfo" "$ramroot/boot/grub/grub.cfg.info"
+    if [ "$fallback" != "" ]; then
+        echo "savedefault=$default_idx" | build_grubenv > "$ramroot/boot/grub/grubenv"
+    else
+        echo -n "" | build_grubenv > "$ramroot/boot/grub/grubenv"
+    fi
+    ramroot_umount
+}
+
+watchdog_start() {
+    watchdog_refresh
+}
+
+watchdog_stop() {
+    echo -n V > /dev/watchdog
+}
+
+watchdog_refresh() {
+    echo -n S > /dev/watchdog
+}
+
+watchdog_status() {
+    if [ "$(lsmod | grep ^softdog | awk '{print $3}')" = "1" ]; then
+        echo running
+    else
+        echo stopped
+    fi
+}
+
+admin() {
+    ramroot_mount_ro
+    export ramroot
+    if [ "$1" = "" ]; then
+        echo "Mounted ramroot read-only at $ramroot (\$ramroot)"
+        echo "Spawning shell with 10-minute timeout for umount"
+        TMOUT=600 /bin/bash
+    else
+        "$@"
+    fi
+    ramroot_umount
+}
+
+if [ "$ramroot_build" != "1" ]; then
+    . /etc/ramroot/boot-info
+fi
+
+if [ "$(whoami)" != "root" ]; then
+   echo "Sorry, you need to be root to run this tool"
+   exit 1
+fi
+
+case "$1" in
+    snapshot)
+        case "$2" in
+            create)
+                snapshot_create "$3"
+                ;;
+            delete)
+                snapshot_delete "$3"
+                ;;
+            enable)
+                case "$4" in
+                    fallback)
+                        snapshot_enable "$3" "$5" "$6"
+                        ;;
+                    "")
+                        snapshot_enable "$3"
+                        ;;
+                    *)
+                        usage
+                        ;;
+                esac
+                ;;
+            list)
+                snapshot_list
+                ;;
+            *)
+                usage
+                ;;
+        esac
+        ;;
+    watchdog)
+        case "$2" in
+            start)
+                watchdog_start
+                ;;
+            stop)
+                watchdog_stop
+                ;;
+            refresh)
+                watchdog_refresh
+                ;;
+            status)
+                watchdog_status
+                ;;
+            *)
+                usage
+                ;;
+        esac
+        ;;
+    admin)
+        shift
+        admin "$@"
+        ;;
+    *)
+        usage
+        ;;
+esac

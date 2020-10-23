@@ -56,7 +56,7 @@ sudo umount $build_dir/mnt
 sudo losetup -d $img_loop
 
 sudo mount $build_dir/img $build_dir/mnt -oloop,offset=$(expr $part_begin \* 1024 \* 1024)
-sudo sh -c "ramroot_build=1 ramroot=$build_dir/mnt boot_uuid=$ramroot_uuid $build_dir/mnt/snapshot/0/usr/local/bin/ramroot-update-grub 0"
+sudo sh -c "ramroot_build=1 ramroot=$build_dir/mnt boot_uuid=$ramroot_uuid $build_dir/mnt/snapshot/0/usr/local/bin/ramroot snapshot enable 0"
 sync
 sleep 2
 sudo umount $build_dir/mnt
