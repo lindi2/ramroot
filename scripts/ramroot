@@ -6,7 +6,8 @@ usage: ramroot snapshot create DESCRIPTION
        ramroot snapshot delete ID
        ramroot snapshot list
        ramroot snapshot enable ID [fallback FALLBACK-ID [FALLBACK-TIMEOUT]]
-       ramroot watchdog [start|stop|refresh|status]
+       ramroot watchdog start TIMEOUT
+       ramroot watchdog [stop|refresh|status]
        ramroot admin [CMD]
 
 snapshot create: Create a snapshot of the running system.
@@ -211,6 +212,14 @@ EOF
 }
 
 watchdog_start() {
+    local timeout="$1"
+    if [ ! -e /dev/watchdog ]; then
+        mknod /dev/watchdog c 10 130
+    fi
+    if [ -e /sys/module/softdog ]; then
+        rmmod softdog
+    fi
+    modprobe softdog "soft_margin=$timeout"
     watchdog_refresh
 }
 
@@ -285,7 +294,7 @@ case "$1" in
     watchdog)
         case "$2" in
             start)
-                watchdog_start
+                watchdog_start "$3"
                 ;;
             stop)
                 watchdog_stop
