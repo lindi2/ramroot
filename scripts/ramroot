@@ -84,6 +84,9 @@ snapshot_create() {
 
 snapshot_delete() {
     local id="$1"
+    if [ "$id" = "$boot_snapshot" ]; then
+        fatal "Cannot delete running snapshot"
+    fi
     ramroot_mount_ro
     if [ ! -d "$ramroot/snapshot/$id" ]; then
         ramroot_umount
