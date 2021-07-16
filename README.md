@@ -95,3 +95,12 @@ layout:
 If the same file is part of multiple snapshots the system will try to
 use a hardlink to save space.
 
+The following boot parameters are used:
+
+| Location                               | Description                                                                                |
+| -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| ramroot_uuid                           | UUID used to find the ramroot snapshot filesystem during boot. If this option is not specified the system will look for any filesystem whose UUID begins with `962d307f-8f1f-4301` and use that. |
+| ramroot_snapshot                       | ID of the currently running snapshot |
+| ramroot_fs                             | Filesystem to use for the running system. This defaults to `tmpfs` and should normally never be specified. |
+| ramroot_fs_uuid                        | UUID used to find the swap filesystem for the esoteric `ramroot_fs=swap` use case. If this option is not specified the system will look for any filesystem whose UUID begins with `ffda8257-f78a-4893` |
+
