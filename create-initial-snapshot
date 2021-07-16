@@ -18,9 +18,9 @@ sudo mkdir -p $build_dir/fs/snapshot/0
 if [ "$debian_mirror" = "" ]; then
     debian_mirror="http://deb.debian.org/debian"
 fi
-sudo debootstrap buster $build_dir/fs/snapshot/0 $debian_mirror
-remove="apt-utils bsdmainutils nano tasksel vim-common vim-tiny iptables logrotate libslang2 whiptail"
-sudo chroot $build_dir/fs/snapshot/0 apt-get -y --force-yes remove $remove
+sudo debootstrap bullseye $build_dir/fs/snapshot/0 $debian_mirror
+remove="apt-utils nano tasksel vim-common vim-tiny logrotate libslang2 whiptail"
+sudo chroot $build_dir/fs/snapshot/0 apt-get -y remove $remove
 sudo chroot $build_dir/fs/snapshot/0 dpkg -P $remove
 add="openssh-server"
 add+=" busybox systemd-sysv rsync"
@@ -31,7 +31,7 @@ else
     add+=" linux-image-686"
 fi
 echo grub-pc grub-pc/install_devices_empty boolean true | sudo chroot $build_dir/fs/snapshot/0 debconf-set-selections
-sudo chroot $build_dir/fs/snapshot/0 apt-get --no-install-recommends --force-yes -y install $add
+sudo chroot $build_dir/fs/snapshot/0 apt-get --no-install-recommends -y install $add
 sudo mkdir -p $build_dir/fs/snapshot/0/etc/ramroot
 echo "$version $modified" | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/origin 2> /dev/null
 git log -10 -p | sudo dd of=$build_dir/fs/snapshot/0/etc/ramroot/gitlog 2> /dev/null
