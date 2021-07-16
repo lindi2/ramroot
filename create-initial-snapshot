@@ -34,5 +34,5 @@ echo grub-pc grub-pc/install_devices_empty boolean true | sudo chroot $build_dir
 sudo chroot $build_dir/fs/snapshot/0 apt-get --no-install-recommends --force-yes -y install $add
 sudo mkdir -p $build_dir/fs/snapshot/0/etc/ramroot
 echo "$version $modified" | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/origin 2> /dev/null
-git log -10 -p | sudo tee $build_dir/fs/snapshot/0/etc/ramroot/gitlog 2> /dev/null
+git log -10 -p | sudo dd of=$build_dir/fs/snapshot/0/etc/ramroot/gitlog 2> /dev/null
 sudo gzip -9 $build_dir/fs/snapshot/0/etc/ramroot/gitlog
