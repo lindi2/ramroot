@@ -84,16 +84,24 @@ layout:
 | /boot/grub/grub.cfg.info               | ramroot's internal state file, describes how grub.cfg was configured                       | 
 | /boot/grub/grubenv                     | grub environment, stores the index of the boot entry that will be booted next              |
 | /snapshot/0                            | initial snapshot, contains just a directory tree to be copied to tmpfs                     |
-| /snapshot/0/etc/ramroot/size           | Size of the snapshot, cached here for speeding up `ramroot snapshot list`                  |
-| /snapshot/0/etc/ramroot/grub-extraopts | Extra kernel options to use for this snapshot when generating master grub.cfg              |
-| /snapshot/0/etc/ramroot/grub-title     | Grub title to use for this snapshot when generating master grub.cfg                        |
-| /snapshot/0/etc/ramroot/origin         | Git commit hash that was used to build the initial snapshot                                |
-| /snapshot/0/etc/ramroot/gitlog.gz      | Last 10 commits of the git repo                                                            |
 | /snapshot/1                            | second snapshot                                                                            |
 | /snapshot/N                            | Nth snapshot                                                                               |
 
 If the same file is part of multiple snapshots the system will try to
 use a hardlink to save space.
+
+Inside search snapshot you can see the following structure:
+
+| Location                               | Description                                                                                |
+| -------------------------------------- | ------------------------------------------------------------------------------------------ |
+| /etc/ramroot/size           | Size of the snapshot, cached here for speeding up `ramroot snapshot list`                  |
+| /etc/ramroot/grub-extraopts | Extra kernel options to use for this snapshot when generating master grub.cfg              |
+| /etc/ramroot/grub-title     | Grub title to use for this snapshot when generating master grub.cfg                        |
+| /etc/ramroot/origin         | Git commit hash that was used to build the initial snapshot                                |
+| /etc/ramroot/gitlog.gz      | Last 10 commits of the git repo                                                            |
+| /etc/initramfs-tools/scripts/local-top/ramroot      | Hook that runs at the very beginning of the initramfs and starts the watchdog |
+| /etc/initramfs-tools/scripts/local-premount/ramroot | Hook that handles copying the selected snapshot to `tmpfs` |
+
 
 The following boot parameters are used:
 
