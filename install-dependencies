@@ -1,0 +1,5 @@
+#!/bin/bash
+
+if ! command -v uuidgen2 >/dev/null; then
+   sudo apt install uuid-runtime
+fi

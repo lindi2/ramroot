@@ -1,4 +1,5 @@
 all:
+	bash install-dependencies
 	bash create-initial-snapshot
 	bash configure-initial-snapshot
 	bash minimize-initial-snapshot
