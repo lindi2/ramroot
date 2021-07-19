@@ -94,11 +94,12 @@ Inside search snapshot you can see the following structure:
 
 | Location                               | Description                                                                                |
 | -------------------------------------- | ------------------------------------------------------------------------------------------ |
-| /etc/ramroot/size           | Size of the snapshot, cached here for speeding up `ramroot snapshot list`                  |
 | /etc/ramroot/grub-extraopts | Extra kernel options to use for this snapshot when generating master grub.cfg              |
 | /etc/ramroot/grub-title     | Grub title to use for this snapshot when generating master grub.cfg                        |
 | /etc/ramroot/origin         | Git commit hash that was used to build the initial snapshot                                |
 | /etc/ramroot/gitlog.gz      | Last 10 commits of the git repo                                                            |
+| /etc/ramroot/size           | Size of the snapshot, used for progress bar on bootup and `ramroot snapshot list` |
+| /etc/ramroot/boot-info           | Information on the last successful bootup |
 | /etc/initramfs-tools/scripts/local-top/ramroot      | Hook that runs at the very beginning of the initramfs and starts the watchdog |
 | /etc/initramfs-tools/scripts/local-premount/ramroot | Hook that handles copying the selected snapshot to `tmpfs` |
 
