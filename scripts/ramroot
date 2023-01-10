@@ -147,7 +147,7 @@ snapshot_enable() {
 
     local entries="$(mktemp)"
     local idx=0
-    for i in $(cd "$ramroot/snapshot" && echo *); do
+    for i in $(cd "$ramroot/snapshot" && find * -maxdepth 0 | sort -n); do
         if [ "$i" = "$default" ]; then
 	    local default_idx=$idx
         fi
