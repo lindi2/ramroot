@@ -2,7 +2,7 @@
 
 usage() {
 cat 1>&2 <<EOF
-usage: ramroot snapshot create DESCRIPTION
+usage: ramroot snapshot create DESCRIPTION [--enable]
        ramroot snapshot delete ID
        ramroot snapshot list
        ramroot snapshot enable ID [fallback FALLBACK-ID [FALLBACK-TIMEOUT]]
@@ -62,6 +62,7 @@ ramroot_umount() {
 
 snapshot_create() {
     local desc="$1"
+    local flags="$2"
     
     local prev="$boot_snapshot"
 
@@ -80,6 +81,9 @@ snapshot_create() {
     rsync --numeric-ids -ax --delete "--link-dest=../$prev" --exclude "$ramroot" / "$ramroot/snapshot/$new"
     ramroot_umount
     echo "Created snapshot $new"
+    if [ "$flags" = "--enable" ]; then
+        ramroot_enable "$new"
+    fi
 }
 
 snapshot_delete() {
