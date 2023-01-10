@@ -60,8 +60,9 @@ cat > /ramroot-mountroot <<EOF
 #!/bin/sh
 mount -t \$ROOTFSTYPE \$ROOTFLAGS \$ROOT /root
 mkdir /fs
+modprobe ext4
 modprobe ext2 # for amd64 (x86 has CONFIG_EXT2_FS=y)
-while ! mount -t ext2 -n -oro /dev/disk/by-uuid/\${ramroot_uuid} /fs; do
+while ! mount -n -oro /dev/disk/by-uuid/\${ramroot_uuid} /fs; do
     echo "ramroot: waiting for \${ramroot_uuid}"
     ls -l /dev/disk/by-uuid
     sleep 2
