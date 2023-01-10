@@ -5,6 +5,7 @@ cat 1>&2 <<EOF
 usage: ramroot snapshot create DESCRIPTION [--enable]
        ramroot snapshot delete ID
        ramroot snapshot list
+       ramroot snapshot resize
        ramroot snapshot enable ID [fallback FALLBACK-ID [FALLBACK-TIMEOUT]]
        ramroot watchdog start TIMEOUT
        ramroot watchdog [stop|refresh|status]
@@ -123,6 +124,27 @@ snapshot_list() {
     done
     ramroot_umount
 }
+
+snapshot_resize() {
+    local filesystem_blockdev=$(readlink -f "/dev/disk/by-uuid/$boot_uuid")
+    local blockdev=$(echo "$filesystem_blockdev" | sed 's@[0-9]*$@@')
+
+    part_begin="$(fdisk "$blockdev" -l -o start,device | grep "$filesystem_blockdev$" | awk '{print $1}')"
+
+    fsck -f "$filesystem_blockdev"
+    /sbin/fdisk -C 61 -H 255 -S 63 -c -u "$blockdev" <<EOF
+d
+n
+p
+1
+$part_begin
+
+n
+w
+EOF
+    resize2fs "$filesystem_blockdev"
+}
+
 
 snapshot_enable() {
     local default="$1"
@@ -292,6 +314,9 @@ case "$1" in
                 ;;
             list)
                 snapshot_list
+                ;;
+            resize)
+                snapshot_resize
                 ;;
             *)
                 usage
