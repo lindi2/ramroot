@@ -83,7 +83,7 @@ snapshot_create() {
     ramroot_umount
     echo "Created snapshot $new"
     if [ "$flags" = "--enable" ]; then
-        ramroot_enable "$new"
+        snapshot_enable "$new"
     fi
 }
 
@@ -294,7 +294,7 @@ case "$1" in
     snapshot)
         case "$2" in
             create)
-                snapshot_create "$3"
+                snapshot_create "$3" "$4"
                 ;;
             delete)
                 snapshot_delete "$3"
