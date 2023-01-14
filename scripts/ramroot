@@ -6,7 +6,7 @@ usage: ramroot snapshot create DESCRIPTION [--enable]
        ramroot snapshot delete ID
        ramroot snapshot list
        ramroot snapshot resize
-       ramroot snapshot enable ID [fallback FALLBACK-ID [FALLBACK-TIMEOUT]]
+       ramroot snapshot enable [ID|latest] [fallback [FALLBACK-ID|current] [FALLBACK-TIMEOUT]]
        ramroot watchdog start TIMEOUT
        ramroot watchdog [stop|refresh|status]
        ramroot admin [CMD]
@@ -152,12 +152,21 @@ snapshot_enable() {
     local fallback_timeout="$3"
 
     ramroot_mount_ro
+
+    if [ "$default" = "latest" ]; then
+        default="$(cd "$ramroot/snapshot" && find * -maxdepth 0 | sort -n | tail -n1)"
+    fi
+
     if [ ! -d "$ramroot/snapshot/$default/boot" ]; then
         ramroot_umount
         fatal "Default snapshot does not exist"
     fi
 
     if [ "$fallback" != "" ]; then
+        if [ "$fallback" = "current" ]; then
+            fallback="$boot_snapshot"
+        fi
+
         if [ ! -d "$ramroot/snapshot/$fallback/boot" ]; then
             ramroot_umount
             fatal "Fallback snapshot does not exist"

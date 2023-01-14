@@ -21,7 +21,7 @@ $run apt-get update
 $run apt-get -y --force-yes install rsync psmisc
 $run "echo phase1 > /etc/hostname"
 $run ramroot snapshot create phase1
-$run ramroot snapshot enable 1
+$run ramroot snapshot enable latest
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
 while [ "$($run hostname)" != "phase1" ]; do
@@ -47,7 +47,7 @@ done
 # create snapshot 2 and boot to it with watchdog fallback
 $run "echo phase2 > /etc/hostname"
 $run ramroot snapshot create "phase2"
-$run ramroot snapshot enable 2 fallback 1 120
+$run ramroot snapshot enable latest fallback current 120
 echo b | $run dd of=/proc/sysrq-trigger &
 sleep 10
 while [ "$($run hostname)" != "phase2" ]; do
