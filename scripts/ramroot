@@ -10,6 +10,7 @@ usage: ramroot snapshot create DESCRIPTION
        ramroot watchdog start TIMEOUT
        ramroot watchdog [stop|refresh|status]
        ramroot admin [CMD]
+       ramroot upgrade [VERSION]
 
 snapshot create: Create a snapshot of the running system.
 
@@ -21,6 +22,8 @@ seconds. Timeout defaults to 10 minutes.
 admin: Run a command in an environment where \$ramroot points to the
 snapshot directory. If no command is specified a shell is started with
 a timeout of 10 minutes.
+
+upgrade: Upgrade ramroot tools from git. VERSION defaults to "master".
 EOF
 exit 0
 }
@@ -287,6 +290,48 @@ admin() {
     ramroot_umount
 }
 
+download_from_git() {
+    local relative_url="$1"
+    local local_filename="$2"
+    local version="$3"
+
+    local url="https://raw.githubusercontent.com/lindi2/ramroot/$version/$relative_url"
+    local tmp_local_filename="$(mktemp)"
+    busybox wget -q -O "$tmp_local_filename" "$url"
+    if [ $? -ne 0 ]; then
+        rm -f "$tmp_local_filename"
+        fatal "Downloading $local_filename failed"
+    fi
+    diff -u "$local_filename" "$tmp_local_filename"
+    if [ $? -eq 0 ]; then
+        echo "$local_filename is already up-to-date"
+        return
+    fi
+    read -p "Accept patch for $local_filename? [y/N] " ok
+    if [ "$ok" = "y" ]; then
+        echo "Patching $local_filename"
+        mv "$tmp_local_filename" "$local_filename"
+    else
+        rm -f "$tmp_local_filename"
+    fi
+}
+
+upgrade() {
+    local version="$1"
+    if [ "$version" = "" ]; then
+        version="master"
+    fi
+    download_from_git scripts/ramroot /usr/local/bin/ramroot "$version"
+    download_from_git scripts/ramroot-profile.sh /etc/profile.d/ramroot-profile.sh "$version"
+    download_from_git scripts/modules /etc/initramfs-tools/modules "$version"
+    download_from_git scripts/local-top /etc/initramfs-tools/scripts/local-top/ramroot "$version"
+    download_from_git scripts/local-premount /etc/initramfs-tools/scripts/local-premount/ramroot "$version"
+    download_from_git scripts/hooks /etc/initramfs-tools/hooks/ramroot "$version"
+
+    update-initramfs -k $(uname -r) -d
+    update-initramfs -k $(uname -r) -c
+}
+
 if [ "$ramroot_build" != "1" ]; then
     . /etc/ramroot/boot-info
 fi
@@ -351,6 +396,9 @@ case "$1" in
     admin)
         shift
         admin "$@"
+        ;;
+    upgrade)
+        upgrade "$2"
         ;;
     *)
         usage
