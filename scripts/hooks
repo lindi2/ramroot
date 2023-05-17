@@ -20,3 +20,19 @@ if [ -e /sbin/mke2fs ]; then
     copy_exec /sbin/mke2fs /sbin
     copy_exec /sbin/tune2fs /sbin
 fi
+
+if [ -e /usr/bin/zstd ]; then
+    copy_exec /usr/bin/zstd /sbin
+fi
+
+if [ -e /usr/bin/tar ]; then
+    copy_exec /usr/bin/tar /sbin
+fi
+
+if [ -e /usr/lib/x86_64-linux-gnu/libacl.so.1 ]; then
+    copy_exec /usr/lib/x86_64-linux-gnu/libacl.so.1 /lib/x86_64-linux-gnu
+fi
+
+if [ -e /usr/lib/x86_64-linux-gnu/libnss_files.so.2 ]; then
+    copy_exec /usr/lib/x86_64-linux-gnu/libnss_files.so.2 /lib/x86_64-linux-gnu
+fi

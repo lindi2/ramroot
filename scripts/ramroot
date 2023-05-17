@@ -4,6 +4,7 @@ usage() {
 cat 1>&2 <<EOF
 usage: ramroot snapshot create DESCRIPTION
        ramroot snapshot delete ID
+       ramroot snapshot compress ID
        ramroot snapshot list
        ramroot snapshot resize
        ramroot snapshot enable [ID|latest] [fallback [FALLBACK-ID|current] [FALLBACK-TIMEOUT]]
@@ -98,7 +99,7 @@ snapshot_create() {
     if [ -e "$partial" ]; then
         rm -fr "$partial"
     fi
-    rsync --numeric-ids -ax --delete "--link-dest=../snapshot/$prev" --exclude "$ramroot" / "$partial"
+    rsync --numeric-ids --acls --xattrs -ax --delete "--link-dest=../snapshot/$prev" --exclude "$ramroot" / "$partial"
     local rc="$?"
     if [ "$rc" = "0" -o "$rc" = "24" ]; then
         mv "$partial" "$final"
@@ -122,6 +123,7 @@ snapshot_delete() {
         fatal "Snapshot $id does not exist"
     fi
     ramroot_mount_rw
+    rm -f "$ramroot/snapshot/$id.tar.zst"
     local partial="$ramroot/snapshot_partial"
     if [ -e "$partial" ]; then
         rm -fr "$partial"
@@ -131,11 +133,28 @@ snapshot_delete() {
     ramroot_umount
 }
 
+snapshot_compress() {
+    local id="$1"
+
+    if [ "$id" = "latest" ]; then
+        id="$(cd "$ramroot/snapshot" && find * -maxdepth 0 -type d | sort -n | tail -n1)"
+    fi
+
+    ramroot_mount_ro
+    if [ ! -d "$ramroot/snapshot/$id" ]; then
+        ramroot_umount
+        fatal "Snapshot $id does not exist"
+    fi
+    ramroot_mount_rw
+    tar -c --numeric-owner --selinux --acls --xattrs --xattrs-include=security.* --zstd -C "$ramroot/snapshot/$id" -f "$ramroot/snapshot/$id.tar.zst.partial" . && mv "$ramroot/snapshot/$id.tar.zst.partial" "$ramroot/snapshot/$id.tar.zst"
+    ramroot_umount
+}
+
 snapshot_list() {
     ramroot_mount_ro
     . "$ramroot/boot/grub/grub.cfg.info"
     echo "# Free space:$(df --output=avail -h "$ramroot" | tail -n1)"
-    for i in $(cd "$ramroot/snapshot" && find * -maxdepth 0 | sort -n); do
+    for i in $(cd "$ramroot/snapshot" && find * -maxdepth 0 -type d | sort -n); do
         local size="$(expr $(cat "$ramroot/snapshot/$i/etc/ramroot/size") / 1000000)"
         echo "$i (${size}MB) $(cat "$ramroot/snapshot/$i/etc/ramroot/grub-title")"
         if [ "$i" = "$boot_snapshot" ]; then
@@ -150,6 +169,12 @@ snapshot_list() {
             echo "- fallback snapshot"
             echo "  - fallback timeout $fallback_timeout"
         fi
+        if [ -e "$ramroot/snapshot/$i.tar.zst" ]; then
+            local compressed_size_bytes="$(du --one-file-system --summarize --bytes "$ramroot/snapshot/$i.tar.zst" | cut -f1)"
+            local compressed_size="$(expr $compressed_size_bytes / 1000000)"
+            echo "- compressed to ${compressed_size}MB"
+        fi
+
     done
     ramroot_umount
 }
@@ -187,7 +212,7 @@ snapshot_enable() {
     ramroot_mount_ro
 
     if [ "$default" = "latest" ]; then
-        default="$(cd "$ramroot/snapshot" && find * -maxdepth 0 | sort -n | tail -n1)"
+        default="$(cd "$ramroot/snapshot" && find * -maxdepth 0 -type d | sort -n | tail -n1)"
     fi
 
     if [ ! -d "$ramroot/snapshot/$default/boot" ]; then
@@ -211,7 +236,7 @@ snapshot_enable() {
 
     local entries="$(mktemp)"
     local idx=0
-    for i in $(cd "$ramroot/snapshot" && find * -maxdepth 0 | sort -n); do
+    for i in $(cd "$ramroot/snapshot" && find * -maxdepth 0 -type d | sort -n); do
         if [ "$i" = "$default" ]; then
 	    local default_idx=$idx
         fi
@@ -382,6 +407,9 @@ case "$1" in
                 ;;
             delete)
                 snapshot_delete "$3"
+                ;;
+            compress)
+                snapshot_compress "$3"
                 ;;
             enable)
                 case "$4" in

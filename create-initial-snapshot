@@ -25,7 +25,7 @@ remove="apt-utils nano tasksel vim-common vim-tiny logrotate dmidecode"
 sudo chroot $build_dir/fs/snapshot/0 apt-get -y remove $remove
 sudo chroot $build_dir/fs/snapshot/0 dpkg -P $remove
 add="openssh-server"
-add+=" busybox systemd-sysv rsync"
+add+=" busybox systemd-sysv rsync zstd"
 add+=" grub-pc intel-microcode"
 if [ "$(dpkg-architecture -qDEB_BUILD_ARCH)" = "amd64" ]; then
     add+=" linux-image-amd64"

@@ -18,7 +18,9 @@ $run [ -d /etc/ramroot ]
 
 # create a snapshot and boot to it
 $run apt-get update
-$run apt-get -y --force-yes install rsync psmisc
+$run apt-get -y --force-yes install rsync psmisc acl
+$run cp -a /bin/ping ping_copy
+$run cp -a /var/log/journal journal_copy
 $run "echo phase1 > /etc/hostname"
 $run ramroot snapshot resize
 $run ramroot snapshot create phase1
@@ -28,6 +30,33 @@ sleep 10
 while [ "$($run hostname)" != "phase1" ]; do
     sleep 10;
 done
+
+if [ "$($run getcap ping_copy | grep cap_net_raw=ep)" = "" ]; then
+    echo capabilities are not restored properly
+    exit 1
+fi
+
+if [ "$($run getfacl journal_copy | grep default)" = "" ]; then
+    echo ACLs are not restored properly
+    exit 1
+fi
+
+$run ramroot snapshot compress 1
+echo b | $run dd of=/proc/sysrq-trigger &
+sleep 10
+while [ "$($run hostname)" != "phase1" ]; do
+    sleep 10;
+done
+
+if [ "$($run getcap ping_copy | grep cap_net_raw=ep)" = "" ]; then
+    echo capabilities are not restored properly with compressed snapshots
+    exit 1
+fi
+
+if [ "$($run getfacl journal_copy | grep default)" = "" ]; then
+    echo ACLs are not restored properly with compressed snapshots
+    exit 1
+fi
 
 # boot back to initial snapshot
 $run ramroot snapshot enable 0

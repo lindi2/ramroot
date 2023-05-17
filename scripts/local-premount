@@ -68,6 +68,11 @@ while ! mount -n -oro /dev/disk/by-uuid/\${ramroot_uuid} /fs; do
     sleep 2
 done
 sleep 1
+if [ -e /fs/snapshot/\${ramroot_snapshot}.tar.zst ]; then
+   compressed=1
+else
+   compressed=0
+fi
 (
     total_kbytes="\$(expr \$(cat /fs/snapshot/\$ramroot_snapshot/etc/ramroot/size) / 1024)"
     printed_percentage=0
@@ -75,14 +80,38 @@ sleep 1
         current_kbytes="\$(busybox df \$rootmnt | tail -n1 | awk '{print \$3}')"
         target_percentage="\$(expr 100 \* \$current_kbytes / \$total_kbytes)"
         if [ \$printed_percentage -lt \$target_percentage ]; then
-            echo "ramroot: loading snapshot \$ramroot_snapshot: \$target_percentage%"
+            if [ "\$compressed" = "1" ]; then
+                echo "ramroot: loading compressed snapshot \$ramroot_snapshot: \$target_percentage%"
+            else
+                echo "ramroot: loading snapshot \$ramroot_snapshot: \$target_percentage%"
+            fi
             printed_percentage="\$target_percentage"
         fi
         sleep 1
     done
 ) &
 
-(cd /fs/snapshot/\${ramroot_snapshot} && cp -a . \${rootmnt})
+if [ "\$compressed" = "1" ]; then
+    # Workaround https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1004430
+    if [ -e /etc/passwd ]; then
+        mv /etc/passwd /etc/passwd.backup
+    fi
+    if [ -e /etc/group ]; then
+        mv /etc/group /etc/group.backup
+    fi
+    cp /fs/snapshot/\${ramroot_snapshot}/etc/passwd /etc/passwd
+    cp /fs/snapshot/\${ramroot_snapshot}/etc/group /etc/group
+    /sbin/tar --numeric-owner --selinux --acls --xattrs --xattrs-include=security.* -x -f /fs/snapshot/\${ramroot_snapshot}.tar.zst --zstd -C \${rootmnt} --one-top-level=.
+    if [ -e /etc/passwd.backup ]; then
+        mv /etc/passwd.backup /etc/passwd
+    fi
+    if [ -e /etc/group.backup ]; then
+        mv /etc/group.backup /etc/group
+    fi
+else
+    (cd /fs/snapshot/\${ramroot_snapshot} && /sbin/tar -c --numeric-owner --selinux --acls --xattrs --xattrs-include=security.* -f - . | /sbin/tar --numeric-owner --selinux --acls --xattrs --xattrs-include=security.* -x -f - -C \${rootmnt} --one-top-level=.)
+fi
+
 boot_uuid="\$(cd /dev/disk/by-uuid; echo \$ramroot_uuid)"
 echo "boot_uuid=\${boot_uuid}" > \${rootmnt}/etc/ramroot/boot-info
 echo "boot_snapshot=\${ramroot_snapshot}" >> \${rootmnt}/etc/ramroot/boot-info
