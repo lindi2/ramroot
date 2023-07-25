@@ -18,8 +18,8 @@ sudo mkdir -p $build_dir/fs/snapshot/0
 if [ "$debian_mirror" = "" ]; then
     debian_mirror="http://deb.debian.org/debian"
 fi
-sudo debootstrap bullseye $build_dir/fs/snapshot/0 $debian_mirror
-remove="apt-utils nano tasksel vim-common vim-tiny logrotate libslang2 whiptail"
+sudo debootstrap bookworm $build_dir/fs/snapshot/0 $debian_mirror
+remove="apt-utils nano tasksel vim-common vim-tiny logrotate dmidecode"
 sudo chroot $build_dir/fs/snapshot/0 apt-get -y remove $remove
 sudo chroot $build_dir/fs/snapshot/0 dpkg -P $remove
 add="openssh-server"
