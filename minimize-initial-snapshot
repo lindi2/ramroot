@@ -54,3 +54,4 @@ done
         fi
     done
 ) | sudo sh -c 'while read i; do xz -9 $i; mv -i $i.xz $i; done'
+sudo chroot $build_dir/fs/snapshot/0 update-initramfs -k all -c -t
