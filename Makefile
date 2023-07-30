@@ -7,6 +7,7 @@ all:
 
 test:
 	cp img img.test
+	truncate --size=2G img.test
 	screen -d -m -S ramroot-test bash boot-with-qemu img.test
 	script -c 'bash testsuite/all-in-one localhost 8022' testsuite/all-in-one.log
 	screen -S ramroot-test -X kill

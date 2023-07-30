@@ -20,6 +20,7 @@ $run [ -d /etc/ramroot ]
 $run apt-get update
 $run apt-get -y --force-yes install rsync psmisc
 $run "echo phase1 > /etc/hostname"
+$run ramroot snapshot resize
 $run ramroot snapshot create phase1
 $run ramroot snapshot enable latest
 echo b | $run dd of=/proc/sysrq-trigger &

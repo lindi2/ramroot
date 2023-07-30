@@ -160,7 +160,7 @@ snapshot_resize() {
 
     part_begin="$(fdisk "$blockdev" -l -o start,device | grep "$filesystem_blockdev$" | awk '{print $1}')"
 
-    fsck -f "$filesystem_blockdev"
+    fsck -p -f "$filesystem_blockdev"
     /sbin/fdisk -C 61 -H 255 -S 63 -c -u "$blockdev" <<EOF
 d
 n
