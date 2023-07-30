@@ -79,8 +79,14 @@ snapshot_create() {
     while [ -d "$ramroot/snapshot/$new" ]; do
         new="$(expr $new + 1)"
     done
+    local available_space="$(df --block-size=1 --output=avail "$ramroot" | tail -n1)"
+    local required_space="$(du --one-file-system --summarize --bytes / | cut -f1)"
+    if [ "$available_space" -lt "$required_space" ]; then
+        ramroot_umount
+        fatal "Not enough space for a new snapshot. Consider running \"ramroot snapshot resize\" to resize the snapshot filesystem to use the whole disk or delete some snapshots."
+    fi
     echo "#$new $(date -u +"%Y-%m-%d %H:%M") $desc" > /etc/ramroot/grub-title
-    du --one-file-system --summarize --bytes / | cut -f1 > /etc/ramroot/size
+    echo $required_space > /etc/ramroot/size
     ramroot_mount_rw
     rsync --numeric-ids -ax --delete "--link-dest=../$prev" --exclude "$ramroot" / "$ramroot/snapshot/$new"
     ramroot_umount
