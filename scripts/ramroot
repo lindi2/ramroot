@@ -54,13 +54,18 @@ ramroot_mount_ro() {
 
 ramroot_mount_rw() {
     if [ "$ramroot_build" != "1" ]; then
-        mount -o remount,rw "$ramroot"
+        if ! mount -o remount,rw "$ramroot"; then
+            ramroot_umount
+            fatal "Unable to mount ramroot snapshot filesystem for read-write use"
+        fi
     fi
 }
 
 ramroot_umount() {
     if [ "$ramroot_build" != "1" ]; then
-        umount "$ramroot"
+        if ! umount "$ramroot"; then
+            fatal "Unable to unmount ramroot snapshot filesystem"
+        fi
     fi
 }
 
@@ -88,9 +93,22 @@ snapshot_create() {
     echo "#$new $(date -u +"%Y-%m-%d %H:%M") $desc" > /etc/ramroot/grub-title
     echo $required_space > /etc/ramroot/size
     ramroot_mount_rw
-    rsync --numeric-ids -ax --delete "--link-dest=../$prev" --exclude "$ramroot" / "$ramroot/snapshot/$new"
-    ramroot_umount
-    echo "Created snapshot $new"
+    local partial="$ramroot/snapshot_partial"
+    local final="$ramroot/snapshot/$new"
+    if [ -e "$partial" ]; then
+        rm -fr "$partial"
+    fi
+    rsync --numeric-ids -ax --delete "--link-dest=../snapshot/$prev" --exclude "$ramroot" / "$partial"
+    local rc="$?"
+    if [ "$rc" = "0" -o "$rc" = "24" ]; then
+        mv "$partial" "$final"
+        ramroot_umount
+        echo "Created snapshot $new"
+    else
+        rm -fr "$partial"
+        ramroot_umount
+        fatal "rsync failed with code $rc"
+    fi
 }
 
 snapshot_delete() {
@@ -104,7 +122,12 @@ snapshot_delete() {
         fatal "Snapshot $id does not exist"
     fi
     ramroot_mount_rw
-    rm -fr "$ramroot/snapshot/$id"
+    local partial="$ramroot/snapshot_partial"
+    if [ -e "$partial" ]; then
+        rm -fr "$partial"
+    fi
+    mv "$ramroot/snapshot/$id" "$partial"
+    rm -fr "$partial"
     ramroot_umount
 }
 
@@ -132,8 +155,8 @@ snapshot_list() {
 }
 
 snapshot_resize() {
-    local filesystem_blockdev=$(readlink -f "/dev/disk/by-uuid/$boot_uuid")
-    local blockdev=$(echo "$filesystem_blockdev" | sed 's@[0-9]*$@@')
+    local filesystem_blockdev="$(readlink -f "/dev/disk/by-uuid/$boot_uuid")"
+    local blockdev="$(echo "$filesystem_blockdev" | sed 's@[0-9]*$@@')"
 
     part_begin="$(fdisk "$blockdev" -l -o start,device | grep "$filesystem_blockdev$" | awk '{print $1}')"
 
@@ -149,6 +172,10 @@ n
 w
 EOF
     resize2fs "$filesystem_blockdev"
+    local rc="$?"
+    if [ "$rc" != "0" ]; then
+        fatal "resize2fs failed with code $rc"
+    fi
 }
 
 
