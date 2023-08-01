@@ -19,12 +19,14 @@ if [ "$debian_mirror" = "" ]; then
     debian_mirror="http://deb.debian.org/debian"
 fi
 sudo debootstrap bookworm $build_dir/fs/snapshot/0 $debian_mirror
+sudo chroot $build_dir/fs/snapshot/0 sed -i 's@main$@main non-free-firmware@' /etc/apt/sources.list
+sudo chroot $build_dir/fs/snapshot/0 apt-get update
 remove="apt-utils nano tasksel vim-common vim-tiny logrotate dmidecode"
 sudo chroot $build_dir/fs/snapshot/0 apt-get -y remove $remove
 sudo chroot $build_dir/fs/snapshot/0 dpkg -P $remove
 add="openssh-server"
 add+=" busybox systemd-sysv rsync"
-add+=" grub-pc"
+add+=" grub-pc intel-microcode"
 if [ "$(dpkg-architecture -qDEB_BUILD_ARCH)" = "amd64" ]; then
     add+=" linux-image-amd64"
 else
